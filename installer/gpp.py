@@ -386,8 +386,9 @@ def copy_platform(project: Path) -> Path:
 
 
 def write_bridge(project: Path) -> None:
-    bridge = """## Go Product Platform — правила агентной работы
-- Обязательно соблюдайте флоу разработки из **software-development-workflow**. Перед изменением прочитайте `.agents/references/software-development-workflow/docs/workflow.md`, карту `docs/upstream.md` рядом с ним и `docs/engineering/workflow.md` продукта.
+    bridge = """## Правила агентной работы
+- Ведите AGENTS.md и CLAUDE.md полностью на русском языке: заголовки, пояснения, правила и новые разделы. Сохраняйте без перевода только команды, пути, имена файлов, названия продуктов и технические идентификаторы. При настройке существующего продукта переведите и остальные разделы этих файлов, сохраняя смысл и силу всех пользовательских правил.
+- Обязательно соблюдайте флоу разработки из **software-development-workflow**. Перед изменением прочитайте `.agents/references/software-development-workflow/docs/workflow.md`, карту `.agents/references/software-development-workflow/docs/upstream.md` и `docs/engineering/workflow.md` продукта.
 - Используйте проектные навыки из `.agents/skills/` (Codex) и `.claude/skills/` (Claude), роли из `agents/` и материалы из `references/` этих каталогов. Эти версии имеют приоритет над одноимёнными глобальными навыками. Применяйте навыки по характеру задачи; не отменяйте обязательные проверки процесса.
 - Порядок работы: контекст → уточнение требований → проектирование → планирование → реализация → проверка → независимое ревью → выпуск → развитие. Выполняйте применимые согласования и проверки software-development-workflow.
 - Храните требования, HLD/LLD/ADR, контракты и доказательства проверок в Git продукта; обновляйте затронутую документацию вместе с кодом. Не выдумывайте результаты или согласования.
@@ -1315,13 +1316,26 @@ def wizard(args):
 
 def project_asset_plan(names: list[str], manifest: dict) -> dict:
     catalog = catalog_all(manifest)
+    selected_sources = {catalog[name]['key']: catalog[name] for name in names if name in catalog}
+    supporting_assets = []
+    for key, source in sorted(selected_sources.items()):
+        resources = [('references', source.get('references')), ('agents', source.get('agents'))]
+        resources += [(path, path) for path in source.get('resources', [])]
+        for destination, path in resources:
+            if path:
+                supporting_assets.append({
+                    'source': source['repo'], 'source_key': key, 'source_path': path,
+                    'revision': source.get('revision', 'pinned global snapshot'),
+                    'paths': [f'{root}/{destination}' for root in project_assets.ROOTS],
+                })
     return {
+        'supporting_assets': supporting_assets,
         'locations': ['.agents', '.claude'],
         'skills': [{'name': name, 'purpose': SKILL_DESCRIPTIONS.get(name, name.replace('-', ' ')),
                     'source': catalog[name]['repo'] if name in catalog else 'installed external tool / platform',
                     'revision': catalog[name].get('revision', 'pinned global snapshot') if name in catalog else 'content hash',
                     'paths': [f'{root}/skills/{name}' for root in project_assets.ROOTS]}
-                   for name in sorted(set(names))] + [{'name': 'go-project-platform-manager', 'source': 'go-product-platform', 'paths': [f'{root}/skills/go-project-platform-manager' for root in project_assets.ROOTS]}],
+                   for name in sorted(set(names))] + [{'name': 'go-project-platform-manager', 'purpose': 'Управление проектными навыками и настройкой платформы', 'revision': VERSION, 'source': 'go-product-platform', 'paths': [f'{root}/skills/go-project-platform-manager' for root in project_assets.ROOTS]}],
         'agents': ['product-developer', 'product-reviewer'],
         'references': ['supporting files of each selected skill', 'go-product-platform',
                        manifest.get('workflow', {'error': 'workflow source not configured'})],

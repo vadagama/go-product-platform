@@ -66,6 +66,13 @@ class BootstrapTests(unittest.TestCase):
         args = self.prepare_project_assets()
         review = json.loads(self.call(*args, '--json').stdout)
         self.assertEqual(review['skills'][0]['name'], 'one')
+        self.assertEqual(review['supporting_assets'], [{
+            'source': str(self.repo), 'source_key': 'testrepo', 'source_path': 'references',
+            'revision': 'pinned global snapshot',
+            'paths': ['.agents/references', '.claude/references'],
+        }])
+        for skill in review['skills']:
+            self.assertTrue({'name', 'purpose', 'source', 'revision', 'paths'} <= skill.keys())
         self.assertFalse((self.project / '.agents').exists())
         self.call(*args, '--approve')
         manual = self.project / 'MANUAL.md'
@@ -84,6 +91,26 @@ class BootstrapTests(unittest.TestCase):
         for name in ('AGENTS.md', 'CLAUDE.md'):
             self.assertIn('имеют приоритет', (self.project / name).read_text())
             self.assertIn('Обязательно соблюдайте флоу', (self.project / name).read_text())
+
+    def test_review_includes_source_agents_and_resources(self):
+        (self.repo / 'roles').mkdir()
+        (self.repo / 'roles/expert.md').write_text('Source agent')
+        (self.repo / 'templates').mkdir()
+        (self.repo / 'templates/task.md').write_text('Task template')
+        subprocess.run(['git', '-C', str(self.repo), 'add', '.'], check=True)
+        subprocess.run(['git', '-C', str(self.repo), 'commit', '-qm', 'supporting assets'], check=True)
+        manifest = json.loads(self.manifest.read_text())
+        manifest['sources'][0].update(agents='roles', resources=['templates'])
+        self.manifest.write_text(json.dumps(manifest))
+        args = self.prepare_project_assets()
+        review = json.loads(self.call(*args, '--json').stdout)
+        self.assertEqual([item['source_path'] for item in review['supporting_assets']],
+                         ['references', 'roles', 'templates'])
+        self.assertFalse((self.project / '.agents').exists())
+        self.call(*args, '--approve')
+        for root in ('.agents', '.claude'):
+            self.assertEqual((self.project / root / 'agents/expert.md').read_text(), 'Source agent')
+            self.assertEqual((self.project / root / 'templates/task.md').read_text(), 'Task template')
 
     def test_project_assets_preserve_edits_and_preflight_both_roots(self):
         args = self.prepare_project_assets()
@@ -175,6 +202,9 @@ class BootstrapTests(unittest.TestCase):
         for name, phrase in expected.items():
             generated[name] = (self.project / name).read_text('utf-8')
             self.assertIn(phrase, generated[name])
+            self.assertIn('## Правила агентной работы', generated[name])
+            self.assertIn('AGENTS.md и CLAUDE.md полностью на русском языке', generated[name])
+            self.assertIn('сохраняя смысл и силу всех пользовательских правил', generated[name])
             (self.project / name).write_text(
                 '# Правила команды\n\n<!-- GPP:BEGIN -->\nOld English bridge\n'
                 '<!-- GPP:END -->\n\nДополнительные правила.\n', encoding='utf-8')
