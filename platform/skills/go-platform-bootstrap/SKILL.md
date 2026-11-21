@@ -54,6 +54,8 @@ JSON и CLI готовит и выполняет агент. `gpp wizard` в э�
 Определите каталог **этого установленного SKILL.md**, а не текущего продукта.
 Используйте `python3 <каталог-скилла>/scripts/gpp.py <команда>`; ниже `gpp` означает
 именно этот runner. Он использует установленный runtime без PATH и исходного клона.
+Путь к runtime записан в `runtime.path` рядом с этим SKILL.md; относительный путь
+разрешается от каталога скилла. Ниже `<runtime>` обозначает этот каталог.
 Если скилл читается прямо из стартового набора и runtime ещё нет, выполните
 `python3 <корень-набора>/installer/gpp.py install-cli`, затем используйте runner
 из `~/.agents/skills/go-platform-bootstrap/scripts/gpp.py` или каталога Claude.
@@ -127,11 +129,11 @@ JSON и CLI готовит и выполняет агент. `gpp wizard` в э�
   GPP, сохранив смысл, обязательность и структуру пользовательских правил; не удаляйте
   их. CLI сохраняет этот текст буквально, поэтому перевод выполняет агент после init.
 - Каждый продукт использует `docs/engineering/workflow.md` и структуру handbook
-  19–20. Инварианты — `runtime/platform/constitution.md` относительно скилла.
-  Главы и профили доступны в `runtime/platform/` до init и `.go-product-platform/` после.
+  19–20. Инварианты — `<runtime>/platform/constitution.md`.
+  Главы и профили доступны в `<runtime>/platform/` до init и `.go-product-platform/` после.
 - Graphify входит во все профили, включая custom, и устанавливается официальным
   механизмом. Orca skills устанавливаются официально через `skills-install-external`.
-- Для UI предложите app-canvas. Прочитайте `runtime/platform/references/canvas-installation.md`;
+- Для UI предложите app-canvas. Прочитайте `<runtime>/platform/references/canvas-installation.md`;
   после проверки клона выполните `gpp canvas-install --project <корень> --source <clone> --approve`.
   Для существующего UI используйте `--app <path>`. Canvas дополняет SPEC.
 - Повторный запрос управления проектом: прочитайте

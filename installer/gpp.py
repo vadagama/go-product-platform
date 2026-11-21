@@ -255,13 +255,8 @@ def global_bootstrap_skill(bundle: Path | None = None) -> bool:
     if not installed.exists():
         installed.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(source, installed)
-    runtime = installed / 'runtime'
-    if runtime.is_symlink() and runtime.resolve() != bundle.resolve():
-        temporary = installed / '.runtime-new'
-        temporary.symlink_to(bundle, target_is_directory=True)
-        os.replace(temporary, runtime)
-    elif not runtime.is_symlink():
-        runtime.symlink_to(bundle, target_is_directory=True)
+    # Keep the bundle outside skill discovery: it contains other SKILL.md files.
+    (installed / 'runtime.path').write_text(str(bundle.resolve()) + '\n', encoding='utf-8')
     destinations = [root / 'skills/go-platform-bootstrap' for root in (AGENT_ROOT, CLAUDE_ROOT)]
     # Only replace old versioned, GPP-owned symlinks. Never take over user files.
     check_bootstrap_destinations()
@@ -1355,8 +1350,8 @@ def install_project_assets(project: Path, manifest: dict) -> None:
         if name == 'go-platform-bootstrap':
             prefix = 'skills/go-platform-bootstrap'
             project_assets.collect(HERE / 'platform/skills/go-platform-bootstrap', prefix, files)
-            project_assets.collect(HERE / 'installer', prefix + '/runtime/installer', files)
-            project_assets.collect(HERE / 'platform', prefix + '/runtime/platform', files)
+            project_assets.collect(HERE / 'installer', 'references/go-platform-runtime/installer', files)
+            project_assets.collect(HERE / 'platform', 'references/go-platform-runtime/platform', files)
         else:
             project_assets.collect(source.resolve(), 'skills/' + name, files)
         entry = catalog.get(name)

@@ -303,6 +303,32 @@ class BootstrapTests(unittest.TestCase):
                                 env=self.env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_bootstrap_discovery_has_no_nested_skills(self):
+        self.call('install-cli')
+        for agent in ('.agents', '.claude'):
+            skill = self.home / agent / 'skills/go-platform-bootstrap'
+            discovered = [str(Path(base, name).relative_to(skill))
+                          for base, _, names in os.walk(skill, followlinks=True)
+                          for name in names if name == 'SKILL.md']
+            self.assertEqual(discovered, ['SKILL.md'])
+
+    def test_project_bootstrap_runtime_is_portable_outside_skills(self):
+        args = self.prepare_project_assets()
+        lockpath = self.project / 'go-product-platform.lock.json'
+        lock = json.loads(lockpath.read_text())
+        lock['enabled_global_skills'] = ['go-platform-bootstrap']
+        lockpath.write_text(json.dumps(lock))
+        self.call(*args, '--approve')
+        moved = self.root / 'moved-product'
+        shutil.move(self.project, moved)
+        shutil.rmtree(self.home)
+        for agent in ('.agents', '.claude'):
+            skill = moved / agent / 'skills/go-platform-bootstrap'
+            self.assertEqual(list(skill.rglob('SKILL.md')), [skill / 'SKILL.md'])
+            result = subprocess.run([sys.executable, str(skill / 'scripts/gpp.py'), '--help'],
+                                    cwd=self.root, env=self.env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_skill_runtime_follows_relocated_installation(self):
         self.call('install-cli')
         old_bundle = self.home / '.local/share/gpp'
