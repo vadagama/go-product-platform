@@ -2,8 +2,8 @@
 title: "Стек Go-бэкенда"
 description: "Технологический стек серверной части на Go, Обработчик сервиса Connect и граница с доменной логикой, компактный каталог проверенных Go-библиотек и анти-рекомендации."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 6
 source: "handbook.md §8, §42"
 tags: [go, backend, connect, pgx, sqlc, libraries, catalog, stack]

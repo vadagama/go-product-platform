@@ -2,8 +2,8 @@
 title: "Решение и целевая модель"
 description: "Основная модель работы v14: локальные агенты и маленький бинарник. Решение за одну минуту, почему Go-first, карта целевой архитектуры, итоговая спецификация и сравнение Go против Rust."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 1
 source: "handbook.md §0, §1, §22, §24"
 tags: [go-first, architecture, decision, wails, modular-monolith, rust, specification]

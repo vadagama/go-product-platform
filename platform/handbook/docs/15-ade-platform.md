@@ -2,8 +2,8 @@
 title: "ADE: gpp и управление навыками ИИ"
 description: "ADE — начальная настройка v14 — навыки глобально, документация внутри проекта; миграция v13→v14; ADE v15 — интерактивная установка и управление навыками ИИ через агента, CLI-контракт gpp и критерии приёмки."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 15
 source: "handbook.md §47, §48, §49"
 tags: [ade, gpp, skills, orca, graphify, bootstrap, migration, agent-setup]
@@ -13,6 +13,8 @@ next: 16-evolution-adrs.md
 ---
 
 # ADE: gpp и управление навыками ИИ
+
+> **v16:** порядок разработки и условия переходов задаёт [SDD-процесс](19-agent-sdd.md); документацию продукта — [контракт артефактов](20-artifact-contract.md). Исторические рекомендации ниже применяются в этих границах.
 
 **В этом документе:** [ADE — начальная настройка v14](#ade-bootstrap-v14) · [Глобальные каталоги](#ade-global-dirs) · [Установка на новую машину](#ade-global-install) · [Что получает новый проект](#ade-project-layout-v14) · [Жизненный цикл worktree в Orca](#ade-worktree-v14) · [Собственные навыки](#ade-custom-skills) · [Воспроизводимость и безопасность](#ade-global-security) · [Миграция v13→v14](#ade-migration-v14) · [ADE v15](#ade-skills-manager-v15)
 

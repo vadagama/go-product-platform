@@ -1,4 +1,4 @@
-# Go Product Platform v15 — справочник команд для агента
+# Go Product Platform v17 — справочник команд для агента
 
 Обычным пользователям достаточно попросить агента на естественном языке; **агент** выполняет эти команды, подтвердив намерение. Интерактивные пользователи могут запустить `gpp wizard --project .` в терминале.
 
@@ -17,3 +17,33 @@
 - Upstream Git-ревизия может измениться после создания плана. Инструмент обновления отклоняет неодобренные SHA.
 - Orca обновляется своим официальным механизмом обновления, Graphify — командой `uv tool upgrade graphifyy`; каждый способ — только с согласия.
 - Проектный управляющий навык находится в `.go-product-platform/project-skills/go-project-platform-manager/SKILL.md`; по выбору навыков этого проекта всегда сверяйтесь с ним.
+
+## Процесс продукта (SDD v17)
+
+Исполняемых команд SDD больше нет: этапы и артефакты описывает
+`docs/engineering/workflow.md` продукта, а главы 19–20 руководства — порядок и
+формат. Агент:
+
+| Операция | Как выполняется |
+|---|---|
+| Новая фича | Создать `docs/specifications/<SPEC-ID>/requirements.md` по контракту артефактов |
+| Перед реализацией | Заполнить design.md, plan.md и tasks.md; зависимые фичи — ready/released |
+| Проверки | Реальные команды продукта (unit/e2e/contract); команда и результат — в verification.md |
+| Новый цикл | Изменение согласованных входов — пересогласование и свежие проверки; после выпуска — delta-spec с новым ID |
+| Перед слиянием | Независимая сессия ревью; код и документы зафиксированы в Git |
+
+High-риск и выпуск требуют фактического решения человека и записи ссылки на решение
+в PR/журнале фичи. Никакие команды платформы не выполняют deploy.
+
+
+## Опциональный UI canvas
+
+```sh
+gpp canvas-install --project . --source /path/to/reviewed/app-canvas --approve
+# Существующий UI: добавить --app web; новый: --kit shadcn --color '#C2410C'.
+python3 .canvas/board.py doctor
+```
+
+Источник — https://gitlab16.skiftrade.kz/design/app-canvas; перед запуском читать
+`platform/references/canvas-installation.md` в стартовом наборе (после init —
+`.go-product-platform/references/canvas-installation.md`). Offline-init canvas не ставит.

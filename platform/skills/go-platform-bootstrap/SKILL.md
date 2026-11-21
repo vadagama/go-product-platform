@@ -3,7 +3,7 @@ name: go-platform-bootstrap
 description: Инициализация (bootstrap) и сопровождение проектов Go Product Platform в Orca ADE, Codex, Zed и Claude Code. Использовать для создания новых проектов, интерактивных опросников выбора навыков, осмотра установленных глобальных навыков в ~/.agents и ~/.claude, настройки проектных профилей активации, проверки обновлений глобальных навыков, сверки точных Git-ревизий или выполнения явно одобренных установок и обновлений.
 ---
 
-# Go Product Platform — начальная настройка v15
+# Go Product Platform — начальная настройка v17
 
 ## Цель
 
@@ -44,3 +44,30 @@ description: Инициализация (bootstrap) и сопровождени�
 - `references/commands.md`: конкретные CLI-операции, порядок одобрений и восстановление worktree.
 - `.go-product-platform/README.md`: локальная документация проекта, профили и версия.
 - https://orca.dev/docs/cli/skills ; https://github.com/Graphify-Labs/graphify ; https://github.com/addyosmani/agent-skills
+
+## SDD v17: документационный процесс
+
+`gpp init` создаёт в Git продукта `docs/engineering/workflow.md` и черновик HLD.
+Они не входят в игнорируемые локальные материалы. Объясните владельцу разницу:
+глобальные навыки — процесс/технологии; docs продукта — требования, архитектура и доказательства.
+Не обозначайте черновик HLD готовой архитектурой. Для фич создавайте requirements,
+design, plan, tasks, verification и review как Markdown-документы. Следуйте workflow
+продукта, выполняйте реальные проверки и независимое ревью; команд sdd-* в v17 нет.
+Порядок и условия: `.go-product-platform/handbook/docs/19-agent-sdd.md`.
+Миграция v13/v14/v15/v16 → v17 явная; глобальный выбор навыков сохраняется.
+
+## Обязательная основа и опциональный UI canvas
+
+- Каждый продукт использует структуру документации и workflow этого репозитория
+  (главы 19–20). Документы продукта — в отслеживаемом `docs/`; адаптации записать
+  в `docs/engineering/workflow.md`. При init существующие документы не перезаписывать.
+- Graphify из https://github.com/Graphify-Labs/graphify — навык по умолчанию для
+  любого проекта, включая custom. При настройке включить его в предлагаемый набор,
+  установить отсутствующий глобально: `gpp skills-install-external --names graphify --approve`.
+  Существующий выбор при миграции сохранять; offline-init ничего глобально не ставит.
+- Для UI/фронтэнда предложить app-canvas из https://gitlab16.skiftrade.kz/design/app-canvas.
+  Читать `references/canvas-installation.md` в материалах платформы. После проверки
+  локального клона и согласования плана: `gpp canvas-install --project . --source <clone> --approve`.
+  Для существующего приложения передать `--app <path>`, для нового при известном ките
+  `--kit <kit>` и при необходимости `--color <hex>`. Проверить `.canvas/board.py doctor`.
+  Дизайн-пакет `design/` дополняет SPEC продукта; не заменять им инженерную документацию.

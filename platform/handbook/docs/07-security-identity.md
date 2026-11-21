@@ -2,8 +2,8 @@
 title: "Безопасность, идентификация и секреты"
 description: "Rauthy, RustFS и OpenBao; identity, сессии и авторизация без отдельного users-service; профили секретов от .env.local до общего OpenBao."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 7
 source: "handbook.md §15, §28, §29"
 tags: [security, oidc, rauthy, openbao, rustfs, identity, authorization, secrets, sops, age]

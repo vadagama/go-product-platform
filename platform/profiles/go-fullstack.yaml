@@ -1,5 +1,5 @@
 profile: go-fullstack
-version: 13.0.0
+version: 17.0.0
 local_development:
   runtime: native
   backend: go
@@ -20,3 +20,10 @@ skills:
   addyosmani: curated-with-full-references
   graphify: local-graph
   orca: user-global
+
+engineering:
+  workflow: sequential-sdd
+  artifact_format: markdown-yaml-frontmatter
+  team_size: 1-5
+  task_source: markdown
+  merge_gate: product-ci-and-protected-branch

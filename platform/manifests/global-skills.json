@@ -1,5 +1,5 @@
 {
-  "manifest_version": "15.0.0",
+  "manifest_version": "17.0.0",
   "policy": "Install once in ~/.agents/skills and ~/.claude/skills. No shared skill is installed into projects.",
   "sources": [
     {
@@ -12,7 +12,14 @@
         "code-review-and-quality": "skills/code-review-and-quality",
         "code-simplification": "skills/code-simplification",
         "source-driven-development": "skills/source-driven-development",
-        "security-and-hardening": "skills/security-and-hardening"
+        "security-and-hardening": "skills/security-and-hardening",
+        "planning-and-task-breakdown": "skills/planning-and-task-breakdown",
+        "context-engineering": "skills/context-engineering",
+        "api-and-interface-design": "skills/api-and-interface-design",
+        "debugging-and-error-recovery": "skills/debugging-and-error-recovery",
+        "git-workflow-and-versioning": "skills/git-workflow-and-versioning",
+        "constraint-driven-development": "skills/constraint-driven-development",
+        "documentation-and-adrs": "skills/documentation-and-adrs"
       },
       "references": "references"
     },

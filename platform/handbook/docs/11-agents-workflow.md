@@ -2,8 +2,8 @@
 title: "Работа агентов и интеграция"
 description: "Параллельная работа AI-агентов и владение, engineering guardrails, инструменты диагностики, политики агентов и контрольные проверки качества, соло и команда до пяти, точный кандидат и последовательный merge, Makefile-интерфейс."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 11
 source: "handbook.md §12, §44, §40"
 tags: [ai-agents, ownership, guardrails, quality-gates, merge, gitlab-runner, makefile, worktrees]
@@ -13,6 +13,8 @@ next: 12-ai-sdk.md
 ---
 
 # Работа агентов и интеграция
+
+> **v16:** порядок разработки и условия переходов задаёт [SDD-процесс](19-agent-sdd.md); документацию продукта — [контракт артефактов](20-artifact-contract.md). Исторические рекомендации ниже применяются в этих границах.
 
 **В этом документе:** [ИИ-агенты: параллельная работа и владение](#agents) · [Guardrails](#agent-guardrails) · [Инструменты диагностики](#agent-debug) · [Политики агентов и контрольные проверки качества](#agent-policy-v11) · [Соло и команда до пяти](#agent-integration-v11) · [Три режима проверки](#three-check-modes) · [Точный кандидат и merge](#verified-merge) · [Makefile-интерфейс](#make-commands)
 

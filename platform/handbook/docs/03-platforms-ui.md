@@ -2,8 +2,8 @@
 title: "Платформы: веб, настольные и мобильные приложения"
 description: "Web (React + TypeScript + Vite), Desktop (Wails 3 + Go + React), Mobile-стратегия с двумя путями и decision gate, UI engineering и дизайн-система, GPU/ML и производительность."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 3
 source: "handbook.md §3, §9, §10"
 tags: [web, react, vite, desktop, wails, mobile, swiftui, jetpack-compose, ui, design-system, gpu, ml]
@@ -85,6 +85,17 @@ Go не обязан реализовывать GPU-ядро. Возможны: 
 | Mobile | startup, пиковое потребление памяти / память в простое, battery, восстановление после фоновой работы |
 | ИИ-агенты | time-to-green, tool errors, стоимость, повторные попытки |
 | GPU | frame time, memory, throughput, резервный вариант correctness |
+
+## Canvas при настройке UI-проекта {#ui-canvas}
+
+[app-canvas](https://gitlab16.skiftrade.kz/design/app-canvas) — опциональная среда
+разработки и просмотра UI. Предлагать её при настройке проекта с фронтэндом.
+`gpp wizard` принимает путь к проверенному клону; агент запускает
+`gpp canvas-install --project . --source <clone> --approve`.
+Официальный установщик создаёт локальный `.canvas/` и отслеживаемый `design/`;
+`--app <path>` подключает существующее приложение, `--kit <kit>` выбирает кит нового.
+Дизайн-спецификации связываются с `docs/specifications/`, инженерный workflow продукта
+остаётся обязательным. После установки выполнить `.canvas/board.py doctor` через Python.
 
 ---
 

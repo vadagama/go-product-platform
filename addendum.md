@@ -57,6 +57,7 @@ my-product/
 └── .go-product-platform/
     ├── active-global-skills.md
     ├── handbook/
+    ├── docs/
     ├── project-skills/
     │   └── go-project-platform-manager/
     │       └── SKILL.md

@@ -1,0 +1,10 @@
+# Example for a Go product; merge explicitly into its pipeline.
+# GPP v17 has no executable sdd-* gates. Documentation and independent review
+# follow docs/engineering/workflow.md; enforce required jobs and branch protection.
+# Configure a trusted runner with the Go version required by the product.
+product-tests:
+  stage: test
+  script:
+    - go test ./...
+  # Add the product's contract and E2E checks as required jobs.
+  # Passing unit tests alone does not establish release readiness.

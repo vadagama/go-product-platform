@@ -2,8 +2,8 @@
 title: "Развёртывание и эксплуатация"
 description: "VM + Docker Compose как основной production-профиль, рабочая среда policies, контракт процесса выпуска, Compose-пример, рабочая среда readiness, техническая наблюдаемость и бизнес-аудит."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 13
 source: "handbook.md §14, §41, §17, §30"
 tags: [deployment, docker-compose, vm, release-pipeline, readiness, observability, audit, backup, slo]

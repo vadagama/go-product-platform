@@ -17,7 +17,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = '15.0.0'
+VERSION = '17.0.0'
 HERE = Path(__file__).resolve().parent.parent
 USER_HOME = Path(os.environ.get('GPP_USER_HOME', str(Path.home()))).expanduser().resolve()
 AGENT_ROOT = USER_HOME / '.agents'
@@ -360,6 +360,11 @@ def write_bridge(project: Path) -> None:
 - Only use active globally installed skills listed in `.go-product-platform/active-global-skills.md`; never install common skills into this project.
 - To restore it in an Orca worktree, run `gpp init --project . --offline` (no global installs, no network).
 - Do not create any project-specific skill unless the current product requires it; such skills must be explicitly designed from project context.
+- For EVERY product change read `docs/engineering/workflow.md` first. Create/select `docs/specifications/<SPEC-ID>/requirements.md`; follow spec → design → plan → tasks before implementing, and keep specs updated when decisions change.
+- Product repositories MUST use the documentation structure and workflow from Go Product Platform Handbook chapters 19–20; record justified adaptations in `docs/engineering/workflow.md`.
+- Track product HLD/LLD/ADR/contracts/specs/debt in Git under `docs/`, never only in the ignored platform directory. Update affected docs with code.
+- Verify with fresh real test runs before declaring done; use an independent review session before merge. Never invent approvals, test results or reviewer identity.
+- High-risk work and releases require an actual human decision; authorized low/medium-risk steps proceed automatically per project workflow.
 - Use Go-first modular monolith, LOCAL-NATIVE PostgreSQL, isolated worktrees, affected tests and one final verified integration gate.
 - Check `go-product-platform.lock.json` for platform version. For global source SHAs see `~/.agents/go-product-platform/global-skills.lock.json`.
 - Never commit local platform caches, graph results or credentials; never introduce new external services without evidence.
@@ -388,7 +393,7 @@ def lock_project(project: Path) -> None:
     file = project / 'go-product-platform.lock.json'
     current = json_load(file)
     if current and current.get('platform_version') != VERSION:
-        raise RuntimeError('Project pins different platform version. Run `gpp migrate --project .` for v13 to v14.')
+        raise RuntimeError('Project pins different platform version. Run `gpp migrate --project .` to v17.')
     current.update({
         'platform_version': VERSION,
         'skills_scope': 'user-global',
@@ -404,6 +409,84 @@ def lock_project(project: Path) -> None:
     save_json(file, current)
 
 
+def seed_docs(project: Path) -> None:
+    """Idempotent: create absent baseline product docs, never replace user content."""
+    workflow = project / 'docs/engineering/workflow.md'
+    if not workflow.exists():
+        workflow.parent.mkdir(parents=True, exist_ok=True)
+        workflow.write_text('''---
+id: "POLICY-sdd"
+kind: "policy"
+status: "draft"
+owner: "maintainer"
+related: []
+standard: 1
+task_source: "markdown"
+---
+
+# Правила разработки с агентами
+
+Обязательная основа продукта — структура документации и workflow Go Product Platform
+(главы 19–20 руководства). Адаптации фиксируются в этом документе с обоснованием.
+Документы продукта хранятся в Git под docs/, материалы платформы — в .go-product-platform/.
+
+Порядок: specify → design → plan → implement → verify → review → ready → released.
+Каждая фича находится в `docs/specifications/<SPEC-ID>/`: requirements, design, plan, tasks,
+verification, review. Артефакты — обычный Markdown с YAML frontmatter (контракт — глава 20
+руководства); исполняемых ворот нет, дисциплину обеспечивают эти правила, ревью и Git-история.
+
+Прежде чем писать код, зафиксируйте требования с уникальными AC-ID, границы и влияние на
+документацию; затем дизайн (решение, альтернативы, риски) и план с вертикальными срезами-задачами
+(T-ID, зависимости, проверка каждого среза). Не разбивайте фичу на очереди «вся БД», «весь
+backend», «весь frontend».
+
+Доказательства: запускайте реальные проверки (unit/e2e/contract) и фиксируйте команду, результат
+и покрытие AC в verification.md. Старый зелёный отчёт не считается доказательством нового
+кандидата: после смены кода, документов или ребейза проверки прогоняются заново. Изменение
+утверждённых требований/дизайна/плана означает новый цикл с пересогласованием; для выпущенных
+фич создавайте delta-spec с новым ID и related на исходную SPEC.
+
+Автономия: low/medium-риск в согласованном объёме агент проходит сам. Высокий риск (разрушительные
+миграции, границы доверия, архитектура) и любой выпуск требуют фактического решения человека;
+агент не выдумывает одобрения и не понижает риск. Ревью выполняет другая сессия/человек с отдельным
+контекстом; ревьюер не исправляет код сам.
+
+Один владелец фичи и один пишущий агент на worktree; параллелизм — между независимыми фичами.
+tasks.md — единственный список задач; не создавайте второй источник истины. Принятые ADR не
+переписываются: новое решение — новый ADR с supersedes. Не выдавайте draft HLD за реализованную
+архитектуру. API — .proto, данные — миграции; Markdown описывает семантику, а не копирует схемы.
+''', encoding='utf-8')
+    overview = project / 'docs/architecture/hld/overview.md'
+    if not overview.exists():
+        overview.parent.mkdir(parents=True, exist_ok=True)
+        overview.write_text('''---
+id: "HLD-product"
+kind: "hld"
+status: "draft"
+owner: "maintainer"
+related: []
+---
+
+# Архитектура продукта — черновик
+
+## Контекст
+
+TODO: заполнить по контексту продукта.
+
+## Компоненты
+
+TODO: заполнить по контексту продукта.
+
+## Развёртывание
+
+TODO: заполнить по контексту продукта.
+
+## Нефункциональные требования
+
+TODO: заполнить по контексту продукта.
+''', encoding='utf-8')
+
+
 def init(args) -> None:
     project = Path(args.project).expanduser().resolve()
     assert_git(project)
@@ -412,6 +495,7 @@ def init(args) -> None:
         raise RuntimeError('Existing project uses v' + str(lock.get('platform_version')) + '. Run `gpp migrate --project .` explicitly.')
     target = copy_platform(project)
     add_lines(project / '.gitignore', ['# Go Product Platform: per-worktree generated materials', '/.go-product-platform/', '/graphify-out', '/graphify-out/'])
+    seed_docs(project)
     write_bridge(project)
     orca_config(project)
     lock_project(project)
@@ -439,17 +523,20 @@ def migrate(args) -> None:
     project = Path(args.project).expanduser().resolve()
     assert_git(project)
     lock = json_load(project / 'go-product-platform.lock.json')
-    if lock.get('platform_version') == '14.0.0':
+    if lock.get('platform_version') in ('14.0.0', '15.0.0', '16.0.0'):
         save_json(project / 'go-product-platform.lock.json', {
             **lock, 'platform_version': VERSION,
             'global_skills_manifest_version': VERSION,
-            'migration_from': '14.0.0',
+            'migration_from': lock['platform_version'],
         })
         init(argparse.Namespace(project=str(project)))
-        say('Migrated v14 -> v15; previous project-specific files preserved.')
+        stale = project / '.go-product-platform/tools/sdd.py'
+        if stale.is_file():
+            stale.unlink()
+        say('Migrated to v17; existing skills and product documentation preserved.')
         return
     if lock.get('platform_version') != '13.0.0':
-        raise RuntimeError('Migration supports v13/v14 -> v15; project has ' + str(lock.get('platform_version')))
+        raise RuntimeError('Migration supports v13/v14/v15/v16 -> v17; project has ' + str(lock.get('platform_version')))
     if not (AGENT_ROOT / 'skills/go-platform-bootstrap/SKILL.md').is_file() and not args.allow_missing_global:
         raise RuntimeError('Install global skills first: gpp setup-global --skills --graphify --orca; then migrate.')
     local = project / '.go-product-platform'
@@ -485,7 +572,7 @@ def migrate(args) -> None:
         'migration_from': '13.0.0',
     })
     init(argparse.Namespace(project=str(project)))
-    say('Migrated v13 -> v14; project-global skill links removed, project-specific material preserved.')
+    say('Migrated v13 -> v17; project-global skill links removed, project-specific material preserved.')
 
 
 def graph_build(args) -> None:
@@ -522,7 +609,7 @@ def doctor(args) -> None:
     manifest = load_manifest(manifest_path(args))
     expected = set(main.get('enabled_global_skills', []))
     checks = {
-        'project platform docs': (project / '.go-product-platform/handbook/index.html').is_file(),
+        'project platform docs': (project / '.go-product-platform/docs/index.html').is_file(),
         'gitignore platform path': '/.go-product-platform/' in (project / '.gitignore').read_text('utf-8') if (project / '.gitignore').exists() else False,
         'project bridge': (project / 'AGENTS.md').is_file() and (project / 'CLAUDE.md').is_file(),
         'Orca setup': (project / 'orca.yaml').is_file() and 'gpp init' in (project / 'orca.yaml').read_text('utf-8'),
@@ -530,6 +617,9 @@ def doctor(args) -> None:
         'no v13 project vendor': not (project / '.go-product-platform/vendor/addyosmani-agent-skills').exists(),
         'no default project global links': all(not (project / x / 'skills' / n).is_symlink()
                                               for x in ('.agents','.claude') for n in OLD_SKILLS),
+        'workflow doc present': (project / 'docs/engineering/workflow.md').is_file(),
+        'HLD overview present': (project / 'docs/architecture/hld/overview.md').is_file(),
+        'platform version matches CLI': main.get('platform_version') == VERSION,
         'project-specific manager present': (project / '.go-product-platform/project-skills/go-project-platform-manager/SKILL.md').is_file(),
     }
     missing = sorted(n for n in expected if not all((p / 'skills' / n / 'SKILL.md').is_file() for p in (AGENT_ROOT,CLAUDE_ROOT)))
@@ -546,7 +636,7 @@ def clean(_args) -> None:
     say('Non-destructive archive hook; local databases and outputs remain until explicitly cleaned by devctl.')
 
 
-# v15: user-confirmed global skills inventory, activation and immutable updates.
+# v17 retains user-confirmed global skills inventory, activation and immutable updates.
 PROFILE_DEFAULTS = {
     'go-api': ('go-platform-bootstrap', 'golang-design-patterns', 'golang-database', 'golang-testing', 'golang-security', 'go-architecture-review', 'protobuf', 'systematic-debugging'),
     'web': ('go-platform-bootstrap', 'golang-design-patterns', 'golang-database', 'golang-testing', 'protobuf', 'shadcn', 'react-best-practices', 'playwright-cli', 'systematic-debugging'),
@@ -555,6 +645,12 @@ PROFILE_DEFAULTS = {
     'ai': ('go-platform-bootstrap', 'golang-testing', 'protobuf', 'ai-sdk', 'ai-elements', 'security-and-hardening'),
     'custom': ('go-platform-bootstrap',),
 }
+WORKFLOW_SKILLS = ('spec-driven-development', 'planning-and-task-breakdown', 'incremental-implementation', 'test-driven-development', 'code-review-and-quality', 'documentation-and-adrs', 'context-engineering', 'git-workflow-and-versioning')
+for _profile in PROFILE_DEFAULTS:
+    PROFILE_DEFAULTS[_profile] = ('graphify', *PROFILE_DEFAULTS[_profile])
+    if _profile != 'custom':
+        PROFILE_DEFAULTS[_profile] = tuple(dict.fromkeys((*WORKFLOW_SKILLS, *PROFILE_DEFAULTS[_profile])))
+
 SKILL_DESCRIPTIONS = {
     'go-platform-bootstrap': 'Установка платформы, создание worktree и обновление навыков',
     'graphify': 'Построение графа исходников и архитектурных связей',
@@ -971,6 +1067,25 @@ def ask(prompt: str, default: bool = False) -> bool:
         print('Введите y или n.')
 
 
+def install_canvas(args):
+    """Delegate to an explicitly selected, reviewed official canvas checkout."""
+    if not args.approve:
+        raise RuntimeError('Canvas installation requires --approve after reviewing the source and installation plan.')
+    project = Path(args.project).expanduser().resolve()
+    assert_git(project)
+    source = Path(args.source).expanduser().resolve()
+    installer = source / 'canvas_setup.py'
+    if not installer.is_file() or not (source / 'canvas/install.py').is_file():
+        raise RuntimeError('Expected a reviewed app-canvas checkout with canvas_setup.py and canvas/install.py.')
+    cmd = [sys.executable, str(installer), '--project', str(project)]
+    for name in ('app', 'kit', 'color', 'tag'):
+        value = getattr(args, name, None)
+        if value:
+            cmd.extend(['--' + name, value])
+    run(cmd, cwd=project)
+    say('Canvas installer completed. Follow its next steps; run python3 .canvas/board.py doctor before use.')
+
+
 def wizard(args):
     if not sys.stdin.isatty() and not args.allow_pipe:
         raise RuntimeError('Interactive wizard needs a TTY. Agents should use `skills-inventory --json` and explicitly confirmed apply commands.')
@@ -1019,19 +1134,23 @@ def wizard(args):
         if ask('Установить недостающие curated skills глобально?', False):
             to_install = [n for n in missing if n in catalog]
             bootstrap_install = 'go-platform-bootstrap' in missing
-            unhandled = sorted(set(missing) - set(to_install) - {'go-platform-bootstrap'})
-            if unhandled and ask('Установить выбранные Orca/Graphify skills глобально их официальным инструментом?', False):
-                external_installs = unhandled
+        unhandled = sorted(set(missing) & (set(ORCA_SKILLS) | {'graphify'}))
+        if unhandled and ask('Установить выбранные Orca/Graphify skills глобально их официальным инструментом?', False):
+            external_installs = unhandled
     wants_updates = False
     if check_globals and ask('Проверить версии уже установленных skills в GitHub? (требуется сеть)', False):
         updates = check_updates_data(argparse.Namespace(manifest=args.manifest, project=str(project), selected_only=False, offline=False))
         for s in updates['sources']:
             print(f'  {s["key"]}: {s["status"]} {str(s["installed_sha"] or "")[:12]} -> {str(s["latest_sha"] or "")[:12]}')
         wants_updates = bool([s for s in updates['sources'] if s['status'] == 'update-available']) and ask('Установить показанные обновления после подтверждения?', False)
+    print('Canvas для UI: https://gitlab16.skiftrade.kz/design/app-canvas')
+    print('Установка может скачать Node.js, зависимости и настроить адаптеры агентов. Сначала проверьте исходники.')
+    canvas_source = input('Путь к проверенному клону app-canvas (Enter — без canvas): ').strip()
     print('\nИТОГ:')
     print(f'  Проект: {project}\n  Профиль: {profile}\n  Активные skills: {", ".join(sorted(set(chosen))) or "нет"}')
     print(f'  Глобально установить: {", ".join(to_install + external_installs + (["go-platform-bootstrap"] if bootstrap_install else [])) or "нет"}')
     print(f'  Обновления глобальных skills: {"да" if wants_updates else "нет"}')
+    print(f'  Canvas: {canvas_source or "не устанавливать"}')
     print('  Управляющий skill проекта будет создан внутри .go-product-platform/project-skills/.')
     if not ask('Применить этот план?', False):
         say('Отменено; глобальные skills и проект не менялись.')
@@ -1051,13 +1170,22 @@ def wizard(args):
         planpath = project / '.go-product-platform/global-skills-update-plan.json'
         save_json(planpath, updates)
         upgrade_from_plan(argparse.Namespace(plan=str(planpath), approve=True, manifest=args.manifest))
+    if canvas_source:
+        install_canvas(argparse.Namespace(project=str(project), source=canvas_source, approve=True))
     say('Мастер завершён. В следующий раз просто попросите агента проверить или обновить навыки.')
 
 
 
 def parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description='Go Product Platform v15 (agent-managed skills, confirmed updates)')
+    p = argparse.ArgumentParser(description='Go Product Platform v17 (agent docs, skills, artifact contract)')
     commands = p.add_subparsers(dest='command', required=True)
+    canvas = commands.add_parser('canvas-install', help='Install optional UI canvas from a reviewed app-canvas checkout')
+    canvas.add_argument('--project', default='.')
+    canvas.add_argument('--source', required=True, help='Reviewed local clone of https://gitlab16.skiftrade.kz/design/app-canvas')
+    canvas.add_argument('--approve', action='store_true')
+    for option in ('app', 'kit', 'color', 'tag'):
+        canvas.add_argument('--' + option)
+    canvas.set_defaults(handler=install_canvas)
     commands.add_parser('install-cli').set_defaults(handler=install_cli)
     g = commands.add_parser('setup-global', help='Once per macOS account: shared skills and tools')
     for flag in ('skills','graphify','orca','dry-run','offline','refresh','continue-on-error'):
@@ -1071,7 +1199,7 @@ def parser() -> argparse.ArgumentParser:
     i.add_argument('--project', default='.')
     i.add_argument('--offline', action='store_true', help='Explicit guarantee: no network or global writes (already true for init)')
     i.set_defaults(handler=init)
-    m = commands.add_parser('migrate', help='Explicit migration v13 project skill links to v14 global model')
+    m = commands.add_parser('migrate', help='Explicit migration v13/v14/v15/v16 to v17 and global-skills model')
     m.add_argument('--project', default='.')
     m.add_argument('--allow-missing-global', action='store_true', help='Use only for offline troubleshooting')
     m.set_defaults(handler=migrate)
@@ -1136,6 +1264,6 @@ if __name__ == '__main__':
     try:
         args = parser().parse_args()
         args.handler(args)
-    except (RuntimeError, ValueError, OSError, KeyError, TypeError) as exc:
+    except (RuntimeError, ValueError, OSError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
         print(f'[gpp] ERROR: {exc}', file=sys.stderr)
         sys.exit(1)

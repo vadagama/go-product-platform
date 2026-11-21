@@ -2,8 +2,8 @@
 title: "Совместимость, ADR и история версий"
 description: "Правила совместимости и миграций для API, БД, sync, клиентов и UI; реестр ADR с принятыми решениями; переход с руководства v9 на Go-first стандарт."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 16
 source: "handbook.md §19, §20, §25"
 tags: [compatibility, migrations, adr, decisions, history, v9, go-first]
