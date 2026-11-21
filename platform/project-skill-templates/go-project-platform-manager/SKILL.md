@@ -31,6 +31,14 @@ description: Управление настройкой Go Product Platform и а
 
 ## SDD v17 и документация продукта
 
+Для полной настройки стека используйте глобальный `go-platform-bootstrap`.
+`gpp init --setup --profile <profile> --json` выдаёт шаблон; заполненный доверенный
+план применяет `gpp init --project . --setup-plan <plan> --approve`.
+`gpp doctor --project . --ready` запускает свежие проверки инструментов, файлов
+и компонентов продукта по `go-product-platform.setup.json`. Не выдавайте успешный
+`doctor --strict` за готовность стека. Уже разрешённый пользователем план не требует
+повторного подтверждения каждого входящего в него действия.
+
 При новой фиче читать `docs/engineering/workflow.md`, затем релевантные HLD/LLD и SPEC.
 До реализации зафиксировать requirements с AC-ID, затем design и plan с вертикальными
 срезами-задачами; артефакты — обычный Markdown с YAML frontmatter (главы 19–20

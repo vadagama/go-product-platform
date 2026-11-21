@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -149,6 +150,195 @@ class BootstrapTests(unittest.TestCase):
         self.call('install-cli')
         self.assertTrue((self.home/'.local/bin/gpp').is_file())
         self.assertTrue((self.home/'.local/share/gpp/17.0.0/platform/docs/index.html').is_file())
+
+    def test_cli_registers_bootstrap_with_independent_runner(self):
+        checkout = self.root / 'trusted starter'
+        shutil.copytree(SCRIPT.parents[1], checkout,
+                        ignore=shutil.ignore_patterns('.git', 'tests', '__pycache__'))
+        subprocess.run([sys.executable, str(checkout / 'installer/gpp.py'), 'install-cli'],
+                       env=self.env, check=True, capture_output=True)
+        shutil.rmtree(checkout)
+        for agent in ('.agents', '.claude'):
+            skill = self.home / agent / 'skills/go-platform-bootstrap'
+            self.assertTrue((skill / 'SKILL.md').is_file())
+        runner = self.home / '.agents/skills/go-platform-bootstrap/scripts/gpp.py'
+        result = subprocess.run([sys.executable, str(runner), 'init', '--project',
+                                 str(self.project), '--offline'], cwd=self.root,
+                                env={**self.env, 'PATH': '/usr/bin:/bin'},
+                                text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.project / 'docs/engineering/workflow.md').is_file())
+
+    def test_install_cli_preserves_conflicting_bootstrap_skill(self):
+        skill = self.home / '.claude/skills/go-platform-bootstrap'
+        skill.mkdir(parents=True)
+        (skill / 'SKILL.md').write_text('user content')
+        result = self.call('install-cli', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual((skill / 'SKILL.md').read_text(), 'user content')
+        self.assertFalse((self.home / '.local/bin/gpp').exists())
+
+    def test_cli_install_is_repeatable_and_quotes_runtime_path(self):
+        self.env['GPP_HOME'] = str(self.home / 'platform with $literal and spaces')
+        self.call('install-cli')
+        link = self.home / '.agents/skills/go-platform-bootstrap'
+        first = link.resolve()
+        self.call('install-cli')
+        self.assertEqual(first, link.resolve())
+        result = subprocess.run([str(self.home / '.local/bin/gpp'), '--help'],
+                                env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_skill_runtime_follows_relocated_installation(self):
+        self.call('install-cli')
+        old_bundle = self.home / '.local/share/gpp'
+        self.env['GPP_HOME'] = str(self.home / 'new runtime')
+        self.call('install-cli')
+        shutil.rmtree(old_bundle)
+        runner = self.home / '.agents/skills/go-platform-bootstrap/scripts/gpp.py'
+        result = subprocess.run([sys.executable, str(runner), '--help'],
+                                env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_readiness_rejects_documentation_only_project(self):
+        self.call('init', '--project', str(self.project), '--offline')
+        self.call('doctor', '--project', str(self.project), '--strict')
+        result = self.call('doctor', '--project', str(self.project), '--ready', check=False)
+        self.assertNotEqual(result.returncode, 0)
+
+    def readiness_plan(self):
+        plan = json.loads(self.call('init', '--setup', '--profile', 'go-api', '--json').stdout)
+        for tool in plan['tools']:
+            tool['argv'] = [sys.executable, '-c', 'print("test tool")']
+        for component in plan['components']:
+            path = 'checks/' + component['name']
+            (self.project / path).parent.mkdir(exist_ok=True)
+            (self.project / path).write_text('fixture')
+            component['paths'] = [path]
+            component['checks'] = [{'argv': [sys.executable, '-c', 'print("verified")'], 'cwd': '.'}]
+        return plan
+
+    def test_ready_runs_checks_and_propagates_failures(self):
+        self.call('init', '--project', str(self.project), '--offline')
+        self.call('skills-activate', '--project', str(self.project), '--names', 'go-platform-bootstrap', '--approve')
+        self.call('skills-install-global', '--names', 'go-platform-bootstrap', '--approve')
+        plan = self.readiness_plan()
+        path = self.project / 'go-product-platform.setup.json'
+        path.write_text(json.dumps(plan))
+        result = self.call('doctor', '--project', str(self.project), '--ready', check=False)
+        self.assertNotEqual(result.returncode, 0)  # profile differs, required skills missing
+        self.call('skills-activate', '--project', str(self.project), '--profile', 'go-api', '--approve')
+        # Isolated skill fixtures avoid GitHub and real global homes.
+        lock = json.loads((self.project / 'go-product-platform.lock.json').read_text())
+        for name in lock['enabled_global_skills']:
+            for agent in ('.agents', '.claude'):
+                skill = self.home / agent / 'skills' / name
+                if not skill.exists():
+                    skill.mkdir(parents=True)
+                    (skill / 'SKILL.md').write_text('fixture')
+        self.call('doctor', '--project', str(self.project), '--ready')
+        valid_tool = plan['tools'][0]['argv']
+        plan['tools'][0]['argv'] = ['gpp-test-missing-executable']
+        path.write_text(json.dumps(plan))
+        self.assertNotEqual(self.call('doctor', '--project', str(self.project), '--ready', check=False).returncode, 0)
+        plan['tools'][0]['argv'] = valid_tool
+        plan['components'][0]['checks'][0]['argv'] = [sys.executable, '-c', 'raise SystemExit(7)']
+        path.write_text(json.dumps(plan))
+        self.assertNotEqual(self.call('doctor', '--project', str(self.project), '--ready', check=False).returncode, 0)
+        plan['components'] = plan['components'][1:]
+        path.write_text(json.dumps(plan))
+        self.assertNotEqual(self.call('doctor', '--project', str(self.project), '--ready', check=False).returncode, 0)
+
+    def test_setup_plan_validation_before_mutation(self):
+        plan = self.readiness_plan()
+        plan['components'][0]['paths'] = ['../outside']
+        path = self.root / 'plan.json'
+        path.write_text(json.dumps(plan))
+        args = ('init', '--project', str(self.project), '--setup-plan', str(path))
+        self.assertNotEqual(self.call(*args, check=False).returncode, 0)
+        self.assertNotEqual(self.call(*args, '--approve', check=False).returncode, 0)
+        self.assertFalse((self.project / 'go-product-platform.lock.json').exists())
+
+    def test_offline_setup_is_rejected_without_writes(self):
+        plan = self.readiness_plan()
+        path = self.root / 'plan.json'
+        path.write_text(json.dumps(plan))
+        result = self.call('init', '--project', str(self.project), '--offline',
+                           '--setup-plan', str(path), '--approve', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.project / 'go-product-platform.lock.json').exists())
+        self.assertFalse((self.home / '.agents').exists())
+
+    def test_setup_applies_commands_installs_missing_skills_and_repeats(self):
+        plan = self.readiness_plan()
+        plan['profile'] = 'custom'
+        plan['skills'] = ['one']
+        plan['setup'] = [{'argv': [sys.executable, '-c',
+                           'from pathlib import Path; Path("setup-ran").write_text("done")']}]
+        # Graphify's network installer is covered separately. Supply its global fixture here.
+        for agent in ('.agents', '.claude'):
+            skill = self.home / agent / 'skills/graphify'
+            skill.mkdir(parents=True)
+            (skill / 'SKILL.md').write_text('fixture')
+        path = self.root / 'plan.json'
+        path.write_text(json.dumps(plan))
+        args = ('init', '--project', str(self.project), '--setup-plan', str(path),
+                '--manifest', str(self.manifest), '--approve')
+        self.call(*args)
+        self.assertEqual((self.project / 'setup-ran').read_text(), 'done')
+        self.assertTrue((self.home / '.agents/skills/one/SKILL.md').is_file())
+        self.assertTrue((self.home / '.claude/skills/one/SKILL.md').is_file())
+        self.assertEqual(json.loads((self.project / 'go-product-platform.setup.json').read_text()), plan)
+        workflow = self.project / 'docs/engineering/workflow.md'
+        workflow.write_text('user workflow')
+        self.call(*args)
+        self.assertEqual(workflow.read_text(), 'user workflow')
+        (self.project / 'checks/go').unlink()
+        result = self.call('doctor', '--project', str(self.project), '--ready', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Missing/empty artifact', result.stderr)
+
+    def test_setup_stops_on_failure_without_saving_readiness_contract(self):
+        plan = self.readiness_plan()
+        plan['profile'] = 'custom'
+        plan['setup'] = [{'argv': [sys.executable, '-c', 'raise SystemExit(9)']},
+                         {'argv': [sys.executable, '-c', 'from pathlib import Path; Path("unexpected").touch()']}]
+        path = self.root / 'plan.json'
+        path.write_text(json.dumps(plan))
+        result = self.call('init', '--project', str(self.project), '--setup-plan',
+                           str(path), '--approve', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.project / 'unexpected').exists())
+        self.assertFalse((self.project / 'go-product-platform.setup.json').exists())
+
+    def test_setup_rejects_incomplete_profiles_and_escaping_cwd(self):
+        for profile in ('go-api', 'web', 'desktop', 'mobile-native', 'ai', 'custom'):
+            with self.subTest(profile=profile):
+                plan = json.loads(self.call('init', '--setup', '--profile', profile, '--json').stdout)
+                path = self.root / 'plan.json'
+                path.write_text(json.dumps(plan))
+                self.assertNotEqual(self.call('init', '--project', str(self.project), '--setup-plan',
+                                              str(path), '--approve', check=False).returncode, 0)
+        plan = self.readiness_plan()
+        plan['setup'] = [{'argv': [sys.executable, '-c', 'raise SystemExit(0)'], 'cwd': '../'}]
+        path.write_text(json.dumps(plan))
+        self.assertNotEqual(self.call('init', '--project', str(self.project), '--setup-plan',
+                                      str(path), '--approve', check=False).returncode, 0)
+        self.assertFalse((self.project / 'go-product-platform.lock.json').exists())
+
+    def test_setup_rejects_symlink_escape_and_bad_command_schema(self):
+        plan = self.readiness_plan()
+        (self.project / 'outside').symlink_to(self.root, target_is_directory=True)
+        path = self.root / 'plan.json'
+        for command in ({'argv': 'touch unexpected'}, {'argv': []},
+                        {'argv': ['true'], 'timeout': 0}, {'argv': ['true'], 'cwd': 'outside'}):
+            with self.subTest(command=command):
+                plan['setup'] = [command]
+                path.write_text(json.dumps(plan))
+                result = self.call('init', '--project', str(self.project), '--setup-plan',
+                                   str(path), '--approve', check=False)
+                self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.project / 'go-product-platform.lock.json').exists())
 
 
     def test_project_manager_and_active_list_default(self):

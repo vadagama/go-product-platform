@@ -2,7 +2,8 @@
 """Go Product Platform: global shared skills, interactive setup and agent-managed project selection.
 
 Python 3.10+ standard library. Third-party skill instructions/scripts are never executed.
-Global changes happen only with `setup-global`; `init` never installs shared skills.
+Plain `init --offline` never installs shared skills. Approved `init --setup-plan`
+also prepares the selected stack and missing global skills.
 """
 from __future__ import annotations
 
@@ -10,12 +11,15 @@ import argparse
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+from readiness import CONTRACT, check_ready, execute, setup_plan, validate_plan
 
 VERSION = '17.0.0'
 HERE = Path(__file__).resolve().parent.parent
@@ -226,24 +230,31 @@ def install_curated(args) -> None:
     say(f'Global skill installation complete: {len(lock["skills"])} curated entries.')
 
 
-def global_bootstrap_skill() -> bool:
-    source = HERE / 'platform/skills/go-platform-bootstrap'
+def global_bootstrap_skill(bundle: Path | None = None) -> bool:
+    check_bootstrap_destinations()
+    bundle = bundle or install_cli_bundle()
+    source = bundle / 'platform/skills/go-platform-bootstrap'
     if not (source / 'SKILL.md').is_file():
         raise RuntimeError('Bootstrap skill missing from starter kit')
-    installed = GLOBAL_PLATFORM / 'builtins' / VERSION / 'go-platform-bootstrap'
+    digest = hashlib.sha256()
+    for path in sorted(source.rglob('*')):
+        if path.is_file() and '__pycache__' not in path.parts:
+            digest.update(str(path.relative_to(source)).encode())
+            digest.update(path.read_bytes())
+    installed = GLOBAL_PLATFORM / 'builtins' / VERSION / digest.hexdigest()[:16] / 'go-platform-bootstrap'
     if not installed.exists():
         installed.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(source, installed)
+    runtime = installed / 'runtime'
+    if runtime.is_symlink() and runtime.resolve() != bundle.resolve():
+        temporary = installed / '.runtime-new'
+        temporary.symlink_to(bundle, target_is_directory=True)
+        os.replace(temporary, runtime)
+    elif not runtime.is_symlink():
+        runtime.symlink_to(bundle, target_is_directory=True)
     destinations = [root / 'skills/go-platform-bootstrap' for root in (AGENT_ROOT, CLAUDE_ROOT)]
     # Only replace old versioned, GPP-owned symlinks. Never take over user files.
-    for dst in destinations:
-        if dst.is_symlink():
-            if dst.resolve() == installed.resolve():
-                continue
-            if not dst.resolve().is_relative_to((GLOBAL_PLATFORM / 'builtins').resolve()):
-                raise RuntimeError(f'Global bootstrap skill is not GPP-managed: {dst}')
-        elif dst.exists():
-            raise RuntimeError(f'Refusing to overwrite pre-existing bootstrap skill directory: {dst}')
+    check_bootstrap_destinations()
     for dst in destinations:
         if dst.is_symlink() and dst.resolve() != installed.resolve():
             tmp = dst.parent / '.go-platform-bootstrap.gpp-new'
@@ -254,6 +265,16 @@ def global_bootstrap_skill() -> bool:
         else:
             make_link(dst, installed)
     return all((dst / 'SKILL.md').is_file() for dst in destinations)
+
+
+def check_bootstrap_destinations() -> None:
+    for root in (AGENT_ROOT, CLAUDE_ROOT):
+        dst = root / 'skills/go-platform-bootstrap'
+        if dst.is_symlink():
+            if not dst.resolve().is_relative_to((GLOBAL_PLATFORM / 'builtins').resolve()):
+                raise RuntimeError(f'Global bootstrap skill is not GPP-managed: {dst}')
+        elif dst.exists():
+            raise RuntimeError(f'Refusing to overwrite pre-existing bootstrap skill directory: {dst}')
 
 
 def install_graphify(args) -> None:
@@ -346,6 +367,7 @@ def copy_platform(project: Path) -> Path:
         shutil.copytree(HERE / 'platform/project-skill-templates/go-project-platform-manager', project_manager)
     (target / 'tools').mkdir(exist_ok=True)
     shutil.copy2(Path(__file__).resolve(), target / 'tools/gpp.py')
+    shutil.copy2(Path(__file__).resolve().with_name('readiness.py'), target / 'tools/readiness.py')
     alias = project / 'graphify-out'
     if not alias.exists() and not alias.is_symlink():
         alias.symlink_to('.go-product-platform/graphify/out', target_is_directory=True)
@@ -488,6 +510,20 @@ TODO: заполнить по контексту продукта.
 
 
 def init(args) -> None:
+    if getattr(args, 'offline', False) and (getattr(args, 'setup', False) or getattr(args, 'setup_plan', None)):
+        raise RuntimeError('--offline cannot be combined with setup options; use plain init --offline')
+    if getattr(args, 'setup', False):
+        if getattr(args, 'setup_plan', None):
+            raise RuntimeError('Choose --setup or --setup-plan, not both')
+        if not args.profile:
+            raise RuntimeError('--setup requires --profile')
+        print(json.dumps(setup_plan(args.profile), ensure_ascii=False, indent=2))
+        return
+    if getattr(args, 'setup_plan', None):
+        apply_setup(args)
+        return
+    if getattr(args, 'profile', None) or getattr(args, 'json', False):
+        raise RuntimeError('--profile/--json require --setup')
     project = Path(args.project).expanduser().resolve()
     assert_git(project)
     lock = json_load(project / 'go-product-platform.lock.json')
@@ -587,7 +623,7 @@ def graph_build(args) -> None:
     run([binary, '.', '--no-viz'], cwd=project, env=env)
 
 
-def install_cli(_args) -> None:
+def install_cli_bundle() -> Path:
     target = HOME_ROOT / VERSION
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.resolve() != HERE.resolve():
@@ -597,9 +633,50 @@ def install_cli(_args) -> None:
     b = Path(os.environ.get('GPP_BIN_DIR', str(USER_HOME / '.local/bin'))).expanduser()
     b.mkdir(parents=True, exist_ok=True)
     script = b / 'gpp'
-    script.write_text(f'#!/bin/sh\nexec python3 "{target / "installer/gpp.py"}" "$@"\n', encoding='utf-8')
+    script.write_text(f'#!/bin/sh\nexec python3 {shlex.quote(str(target / "installer/gpp.py"))} "$@"\n', encoding='utf-8')
     script.chmod(0o755)
     say(f'gpp CLI ready at {script}')
+    return target
+
+
+def install_cli(_args) -> None:
+    check_bootstrap_destinations()
+    target = install_cli_bundle()
+    if not global_bootstrap_skill(target):
+        raise RuntimeError('Cannot register global bootstrap skill')
+    say('go-platform-bootstrap registered in ~/.agents/skills and ~/.claude/skills')
+
+
+def apply_setup(args) -> None:
+    if not args.approve:
+        raise RuntimeError('Setup plan execution requires --approve after user authorization')
+    project = Path(args.project).expanduser().resolve()
+    assert_git(project)
+    plan = json_load(Path(args.setup_plan).expanduser().resolve())
+    validate_plan(project, plan)
+    names = sorted(set(PROFILE_DEFAULTS[plan['profile']]) | set(plan.get('skills', [])))
+    manifest = load_manifest(manifest_path(args))
+    curated = catalog_all(manifest)
+    unknown = set(names) - set(curated) - set(ORCA_SKILLS) - {'graphify', 'go-platform-bootstrap'}
+    if unknown:
+        raise RuntimeError('Unknown setup skills: ' + ', '.join(sorted(unknown)))
+    # Check version before executing any project commands or touching global state.
+    current = json_load(project / 'go-product-platform.lock.json')
+    if current and current.get('platform_version') != VERSION:
+        raise RuntimeError('Migrate the product explicitly before setup')
+    init(argparse.Namespace(project=str(project)))
+    for command in plan.get('setup', []):
+        execute(project, command)
+    activate_skills(project, plan['profile'], names, manifest)
+    missing = [name for name in names if not all(global_installed(name).values())]
+    selected = [name for name in missing if name in curated or name == 'go-platform-bootstrap']
+    if selected:
+        global_install_selected(argparse.Namespace(names=','.join(selected), approve=True, manifest=args.manifest))
+    external = sorted(set(missing) & (set(ORCA_SKILLS) | {'graphify'}))
+    if external:
+        install_external_selected(argparse.Namespace(names=','.join(external), approve=True))
+    save_json(project / CONTRACT, plan)
+    doctor(argparse.Namespace(project=str(project), manifest=args.manifest, strict=True, ready=True))
 
 
 def doctor(args) -> None:
@@ -608,6 +685,7 @@ def doctor(args) -> None:
     main = json_load(project / 'go-product-platform.lock.json')
     manifest = load_manifest(manifest_path(args))
     expected = set(main.get('enabled_global_skills', []))
+    ready = getattr(args, 'ready', False)
     checks = {
         'project platform docs': (project / '.go-product-platform/docs/index.html').is_file(),
         'gitignore platform path': '/.go-product-platform/' in (project / '.gitignore').read_text('utf-8') if (project / '.gitignore').exists() else False,
@@ -624,12 +702,25 @@ def doctor(args) -> None:
     }
     missing = sorted(n for n in expected if not all((p / 'skills' / n / 'SKILL.md').is_file() for p in (AGENT_ROOT,CLAUDE_ROOT)))
     checks['all activated global skills in both homes'] = not missing
+    if ready:
+        profile = main.get('skills_profile')
+        checks['profile selected with required skills'] = (
+            profile in PROFILE_DEFAULTS and set(PROFILE_DEFAULTS[profile]).issubset(expected))
     for label, ok in checks.items():
         print(f'{"OK  " if ok else "MISS"} {label}')
     if missing:
         say('Missing global skills: ' + ', '.join(missing))
-    if args.strict and not all(checks.values()):
+    if (args.strict or ready) and not all(checks.values()):
         raise RuntimeError('Doctor failed: see MISS items above.')
+    if ready:
+        plan = json_load(project / CONTRACT)
+        validate_plan(project, plan)
+        if plan.get('profile') != main.get('skills_profile'):
+            raise RuntimeError('Setup contract missing or profile differs: ' + CONTRACT)
+        if not set(plan.get('skills', [])).issubset(expected):
+            raise RuntimeError('Setup contract skills are not activated')
+        check_ready(project, plan)
+        say('Product setup verified with fresh checks; this is not release approval.')
 
 
 def clean(_args) -> None:
@@ -738,9 +829,9 @@ def skills_inventory(args):
         say(f'Профиль: {data["selected_profile"]}; активных: {len(data["active_global_skills"])}')
 
 
-def activate_skills(project: Path, profile: str | None, names: list[str]) -> None:
+def activate_skills(project: Path, profile: str | None, names: list[str], manifest: dict | None = None) -> None:
     assert_git(project)
-    manifest = load_manifest(HERE / 'platform/manifests/global-skills.json')
+    manifest = manifest if manifest is not None else load_manifest(HERE / 'platform/manifests/global-skills.json')
     all_names = set(catalog_all(manifest)) | set(ORCA_SKILLS) | {'graphify', 'go-platform-bootstrap'}
     unknown = sorted(set(names) - all_names)
     if unknown:
@@ -1195,9 +1286,15 @@ def parser() -> argparse.ArgumentParser:
     g.set_defaults(handler=setup_global)
     o = commands.add_parser('orca-install', help='Install Orca skills into both user-global folders')
     o.add_argument('--dry-run', action='store_true'); o.set_defaults(handler=orca_install)
-    i = commands.add_parser('init', help='Initialize ignored platform docs; no global skill changes')
+    i = commands.add_parser('init', help='Initialize platform docs; optionally apply an approved product setup plan')
     i.add_argument('--project', default='.')
-    i.add_argument('--offline', action='store_true', help='Explicit guarantee: no network or global writes (already true for init)')
+    i.add_argument('--offline', action='store_true', help='Restore materials without network/global writes; incompatible with setup options')
+    i.add_argument('--setup', action='store_true', help='Print a profile setup contract to complete and review (no writes)')
+    i.add_argument('--profile', choices=list(PROFILE_DEFAULTS))
+    i.add_argument('--json', action='store_true', help='Machine-readable setup contract; use with --setup')
+    i.add_argument('--setup-plan', help='Apply a reviewed JSON setup contract, including its commands and missing global skills')
+    i.add_argument('--approve', action='store_true')
+    i.add_argument('--manifest')
     i.set_defaults(handler=init)
     m = commands.add_parser('migrate', help='Explicit migration v13/v14/v15/v16 to v17 and global-skills model')
     m.add_argument('--project', default='.')
@@ -1206,7 +1303,9 @@ def parser() -> argparse.ArgumentParser:
     d = commands.add_parser('doctor', help='Validate project and global skill locations')
     d.add_argument('--project', default='.')
     d.add_argument('--manifest')
-    d.add_argument('--strict', action='store_true'); d.set_defaults(handler=doctor)
+    d.add_argument('--strict', action='store_true')
+    d.add_argument('--ready', action='store_true', help='Require profile skills and execute trusted product setup checks')
+    d.set_defaults(handler=doctor)
     gr = commands.add_parser('graph-build')
     gr.add_argument('--project', default='.'); gr.set_defaults(handler=graph_build)
     si = commands.add_parser('skills-inventory', help='Read-only JSON inventory for agents and wizard')
