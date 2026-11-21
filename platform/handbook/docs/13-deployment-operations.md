@@ -16,13 +16,17 @@ next: 14-skills-catalog.md
 
 **В этом документе:** [Инфраструктура: VM + Docker Compose](#deployment) · [Правила эксплуатации](#deployment-policies) · [Контракт процесса выпуска](#release-pipeline) · [Минимальный Compose](#compose-example) · [Развёртывание без смены архитектуры](#compose-v11) · [Готовность к эксплуатации](#operations) · [Наблюдаемость и бизнес-аудит](#embedded-observability)
 
-## Инфраструктура без переписывания: VM + Docker Compose {#deployment}
+<a name="deployment"></a>
+
+## Инфраструктура без переписывания: VM + Docker Compose
 
 **Первый и основной развёртывание в рабочей среде:** Linux VM + неизменяемый OCI-образ Go API + PostgreSQL + обратный прокси (Caddy). Rauthy, RustFS, OpenBao и sync-service подключаются только по выбранному профиль возможностей; для нескольких продуктов предпочтительны общие существующие сервисы. **Второй профиль:** Kubernetes с тем же Go API image, но другой слой оркестрации. На локальном Mac Docker не нужен. На VM Docker — нормальный способ доставки воспроизводимого приложения.
 
 <div class="diagram"><div class="diagram-title">Рисунок 5. Приоритет VM: расширенный профиль (IdP/S3/OpenBao опциональны)</div><div class="flowboxes stack"><div class="node accent" style="min-width:65%">Linux VM · Docker Compose<small>изоляция сети · постоянные тома · проверки состояния</small></div></div><div class="flowboxes"><div class="node">Caddy<small>Завершение TLS</small></div><div class="node">Go API + ресурсы React<small>Connect-Go · health</small></div><div class="node">PostgreSQL 18<small>Резервное копирование с PITR</small></div></div><div class="flowboxes"><div class="node">Rauthy<small>OIDC</small></div><div class="node">RustFS<small>S3</small></div><div class="node">OpenBao<small>Секреты + хранилище Raft</small></div></div><div class="diagram-note">На минимальной VM достаточно Caddy + Go API + PostgreSQL. Rauthy/RustFS/OpenBao, Agent Service и Electric/PowerSync — подключаемые по запросу / общие интеграции. Одна VM — единая точка отказа.</div></div>
 
-### Правила эксплуатации {#deployment-policies}
+<a name="deployment-policies"></a>
+
+### Правила эксплуатации
 
 - В Git хранятся манифест Compose, зафиксированные хеши образов, Caddyfile, политики и шаблоны OpenBao, migrations, runbooks и манифест выпуска. **Не хранятся секреты рабочей среды в открытом виде.**
 - Go API/React можно отдавать из одного Go binary/container, либо выделить статические assets через обратный прокси, если это проще.
@@ -31,13 +35,17 @@ next: 14-skills-catalog.md
 - Одна VM не обеспечивает HA: для рабочая среда определить допустимый RPO/RTO, независимые backup stores, PITR и restore-drills. OpenBao требует bootstrap/unseal и план ротации.
 - Для сетевых RPC прокси должен корректно передавать protobuf Content-Type и потоковые ответы; переключение на WebSocket должен быть явным.
 
-### Контракт процесса выпуска {#release-pipeline}
+<a name="release-pipeline"></a>
+
+### Контракт процесса выпуска
 
 `commit → tests → buf breaking → go build → OCI/SBOM/signature → migration check → VM deploy via Ansible + Compose → smoke → promote`. K8s профиль использует тот же OCI image, migration Job, Secrets integration и metrics.
 
 Сборка для Linux выполняется в CI в целевом окружении, а не копированием бинарника macOS. При CGO или native dependencies нужен воспроизводимый build target с соответствующей libc и arch.
 
-### Минимальный пример Compose для Go API {#compose-example}
+<a name="compose-example"></a>
+
+### Минимальный пример Compose для Go API
 
 ```yaml
 # deploy/compose.yaml — иллюстрация минимального ядра для VM-профиля
@@ -76,7 +84,9 @@ volumes:
 
 Это **иллюстративный основной фрагмент**: заменить digest и добавить identity/networking, Caddy, observability, backup, OpenBao Agent, конфигурацию Rauthy и RustFS. Манифест Compose под конкретный продукт заводится при подготовке к развёртыванию; в репозитории платформы на старте готового файла нет. Для PostgreSQL обновление основной версии меняется layout; реальный путь тома сверять с используемым image/tag. `POSTGRES_PASSWORD_FILE` относится к образ postgres; для собственного API чтение `PGPASSWORD_FILE` следует реализовать отдельно (или передавать DSN через конфигурацию, подключённую как секрет).
 
-## Развёртывание без смены архитектуры: VM Compose первая {#compose-v11}
+<a name="compose-v11"></a>
+
+## Развёртывание без смены архитектуры: VM Compose первая
 
 **Минимальный профиль VM:** Caddy/TLS → `go-api` (собранные ресурсы React встроен через `go:embed` либо отдается proxy) + PostgreSQL; локальные директории для файлов и secrets. Встроенные River, flags, audit, analytics, notifications, FSM и websocket живут в `go-api`. **Не запускать Rauthy/RustFS/OpenBao/Electric/Umami/Kafka просто потому, что они есть в старом compose**; подключать только по выбранному профиль возможностей — см. [матрицу возможностей](02-architecture.md#capability-matrix).
 
@@ -92,7 +102,9 @@ volumes:
 
 Избранные возможности не должны влиять на локальный workflow: интерфейсы OIDC, S3, SMTP и ML заменяются детерминированными тестовыми адаптерами. Kubernetes остается вторым профилем и не определяет структуру доменных пакетов.
 
-## Готовность к эксплуатации: пока не автоматизировали — не готово {#operations}
+<a name="operations"></a>
+
+## Готовность к эксплуатации: пока не автоматизировали — не готово
 
 | Риск | Обязательное решение |
 |---|---|
@@ -109,7 +121,9 @@ volumes:
 
 Общие метрики/logs/traces: OpenTelemetry Collector → Prometheus/Grafana и Loki/Tempo либо другой существующий стек; не разворачивать большой monitoring stack в каждом приложении. Заранее определить SLO на business RPC и приемлемое время восстановления.
 
-## Техническая наблюдаемость и бизнес-аудит {#embedded-observability}
+<a name="embedded-observability"></a>
+
+## Техническая наблюдаемость и бизнес-аудит
 
 Сразу разделять: **технический лог**, **операционная метрика**, **бизнес-аудит**, **аналитическое событие**. Они имеют разные гарантии, хранение и цели, даже если записываются одним процессом.
 

@@ -18,7 +18,9 @@ next: 12-ai-sdk.md
 
 **В этом документе:** [ИИ-агенты: параллельная работа и владение](#agents) · [Guardrails](#agent-guardrails) · [Инструменты диагностики](#agent-debug) · [Политики агентов и контрольные проверки качества](#agent-policy-v11) · [Соло и команда до пяти](#agent-integration-v11) · [Три режима проверки](#three-check-modes) · [Точный кандидат и merge](#verified-merge) · [Makefile-интерфейс](#make-commands)
 
-## ИИ-агенты: параллельная работа и владение {#agents}
+<a name="agents"></a>
+
+## ИИ-агенты: параллельная работа и владение
 
 Код могут писать агенты, но **качество доказывают артефакты и тесты**, а не их текстовые заверения. На Mac с 24 ГБ RAM стартовать с 2–3 активных coding-agent worktrees, затем увеличивать параллелизм только после мониторинга RAM и длительности сборок.
 
@@ -26,7 +28,9 @@ next: 12-ai-sdk.md
 
 **Ownership:** один агент владеет изменением `.proto` и миграций в момент интеграции; UI и API согласуются по сгенерированным контрактам. Не допускать параллельного редактирования одной миграционной истории без очереди. Конфликт — новая task или rebase, не скрытое overwrite.
 
-### Ограничения и правила разработки с ИИ {#agent-guardrails}
+<a name="agent-guardrails"></a>
+
+### Ограничения и правила разработки с ИИ
 
 | Инвариант | Машинная проверка |
 |---|---|
@@ -41,11 +45,15 @@ next: 12-ai-sdk.md
 
 **Навыки по профилям:** `test-driven-development`, `systematic-debugging`, `verification-before-completion` (Superpowers), Vercel React Best Practices, официальные рекомендации shadcn, аудит безопасности Trail of Bits, внутренние `go-service-patterns`, `connect-contract-review`, `wails-security`, `worktree-isolation`, `mobile-readiness`, `sync-conflict-tests`, `complexity-review`. У сторонних навыков проверять реальную установку/версии и исполняемые скрипты; pin по commit SHA. Каталог и маршрутизация — в [Навыки ИИ](14-skills-catalog.md#skills).
 
-### Инструменты диагностики для агента {#agent-debug}
+<a name="agent-debug"></a>
+
+### Инструменты диагностики для агента
 
 Каждый agent worktree предоставляет URL приложения, structured logs, trace_id, sample SQL трассировки, снимки экрана и возможность запускать локальные команды без Docker. Сбой агент локализует через reproducible fixture и log/trace, а не многократной генерацией кода без анализа.
 
-## Политики для AI-агентов и контрольные проверки качества {#agent-policy-v11}
+<a name="agent-policy-v11"></a>
+
+## Политики для AI-агентов и контрольные проверки качества
 
 AI-агент может **изменять код**, но не может сам себе засчитывать невыполненные проверки. Отчет содержит список команд, exit codes, длительности, ссылки на browser traces/screenshots, контентный fingerprint или точный SHA кандидата.
 
@@ -65,7 +73,9 @@ AI-агент может **изменять код**, но не может са�
 
 **Рекомендуемые навыки для harness** (включать по задаче, а не все глобально): `test-driven-development`, `systematic-debugging`, `verification-before-completion` (Superpowers); `vercel-react-best-practices`, `web-design-guidelines` (Vercel); официальные рекомендации shadcn; внутренние `go-module-boundaries`, `go-transactions`, `river-reliable-jobs`, `fsm-lifecycle`, `product-analytics-contracts`, `background-e2e`, `worktree-isolation`, `complexity-review`. Последние — **предлагаемые корпоративные навыки**, не названия подтвержденных публичных пакетов.
 
-## Соло и команда до пяти: один подход, разная финальная интеграция {#agent-integration-v11}
+<a name="agent-integration-v11"></a>
+
+## Соло и команда до пяти: один подход, разная финальная интеграция
 
 **Одна задача — одна short-lived ветка — один worktree — один ответственный за изменяемые файлы.** Ревью/исследовательским агентам write-access обычно не нужен. Для простого сквозного изменения один агент реализует domain → API → UI → tests в одном worktree, чтобы не создавать лишние межагентные согласования.
 
@@ -81,7 +91,9 @@ AI-агент может **изменять код**, но не может са�
 
 **GitLab Runner shell executor** на macOS допустим для доверенного проекта, но на ноябрь 2026 он находится в maintenance mode и предоставляет слабую изоляцию: не запускать из него чужие PR с prod secrets. В командном контуре Linux Docker executor управляемее; локальный macOS runner — платформенное дополнение, а не обязательная точка отказа. [GitLab shell executor](https://docs.gitlab.com/runner/executors/shell/).
 
-### Три режима тестирования и интеграции {#three-check-modes}
+<a name="three-check-modes"></a>
+
+### Три режима тестирования и интеграции
 
 | Режим | Когда | Что запускается |
 |---|---|---|
@@ -92,18 +104,22 @@ AI-агент может **изменять код**, но не может са�
 
 В рабочем цикле не должно быть скрытой двойной полной проверки `pre-push full verify` и затем такого же job в GitLab на том же Mac. `make submit` подготавливает чистый кандидат и запускает runner; `make verify` — одна авторитетная реализация обязательного набора.
 
-### Точный кандидат и последовательный merge {#verified-merge}
+<a name="verified-merge"></a>
+
+### Точный кандидат и последовательный merge
 
 1. Координатор получает актуальный `main`, обновляет ветку и устраняет конфликты.
 2. Замораживает candidate; при необходимости squash делается **до** проверки.
 3. Runner проверяет конкретный commit (или merged result, где это поддерживается).
-4. Если candidate или base меняется, соответствующий gate запускается снова.
+4. Если проверяемые входы candidate или base меняются, соответствующий gate запускается снова. Исключение для коммита только с отчётами — в [правилах свежести](19-agent-sdd.md#sdd-evidence); SHA проверенного кандидата сохраняется в отчёте.
 5. При успехе — fast-forward merge; скрипт сверяет expected commit и current main.
 6. Только после подтверждения очистить worktree/DB/ports.
 
 **Состояние main = интегрированная прошедшая проверку версия.** Release = версия, прошедшая дополнительные платформенные проверки и опубликованная. Long-lived `dev`, `stage`, `prod` branches не нужны: окружения получают определенный артефакт.
 
-### Интеграционный интерфейс Makefile {#make-commands}
+<a name="make-commands"></a>
+
+### Интеграционный интерфейс Makefile
 
 ```makefile
 .PHONY: bootstrap dev check verify release e2e-watch
