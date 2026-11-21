@@ -52,7 +52,7 @@ Slash-вызов поддерживается не каждой ADE; скилл 
 
 **Нормативное решение:** все переиспользуемые навыки установлены **один раз** в домашней директории macOS-пользователя. При создании нового проекта агенты пользуются только этими общими навыками. `.go-product-platform/` сохраняется в каждом checkout/worktree для архитектурной документации, профилей, шаблонов, локального графа и контекста продукта, **но не является копией библиотеки общих навыков**.
 
-<div class="diagram"><div class="diagram-title">Рисунок 11. Глобальные навыки и независимый локальный проект</div><div class="flowboxes stack"><div class="node accent">Глобальные навыки пользователя (один раз на Mac)<small>~/.agents/skills · ~/.claude/skills · Graphify · Addy Osmani · Orca · Go/UI/API</small></div><div style="font-size:20px;color:#64748b">↓ поиск навыков агентом по задаче, без копирования</div><div class="node">Codex · Claude · Zed · Orca<small>Глобальные навыки · общая версия источников на этой машине</small></div><div style="font-size:20px;color:#64748b">↓ новый Git worktree → gpp init --offline</div><div class="node accent">my-product/.go-product-platform/<small>Руководство · правила · профиль · Graphify out · проектные данные · без общих навыков</small></div><div style="font-size:20px;color:#64748b">↓ работа над фичей</div><div class="node">Go / Vite / PostgreSQL LOCAL-NATIVE<small>Отдельные БД/порты · фоновые E2E · проверенный merge</small></div></div></div>
+<div class="diagram"><div class="diagram-title">Рисунок 11. Глобальные навыки и независимый локальный проект</div><div class="flowboxes stack"><div class="node accent">Глобальные навыки пользователя (один раз на Mac)<small>~/.agents/skills · ~/.claude/skills · Graphify · Addy Osmani · Orca · Go/UI/API</small></div><div style="font-size:20px;color:#64748b">↓ согласование и копирование выбранного набора в .agents и .claude продукта</div><div class="node">Codex · Claude · Zed · Orca<small>Проектные навыки, агенты и референсы · версии в Git продукта</small></div><div style="font-size:20px;color:#64748b">↓ новый Git worktree → gpp init --offline</div><div class="node accent">my-product/.go-product-platform/<small>Руководство · правила · профиль · Graphify out · проектные данные · без общих навыков</small></div><div style="font-size:20px;color:#64748b">↓ работа над фичей</div><div class="node">Go / Vite / PostgreSQL LOCAL-NATIVE<small>Отдельные БД/порты · фоновые E2E · проверенный merge</small></div></div></div>
 
 ### Какие каталоги являются глобальными {#ade-global-dirs}
 
@@ -166,11 +166,11 @@ gpp doctor --project . --strict
 
 **Нормативное решение v15 (заменяет порядок ручной установки из исторических разделов [ADE — начальная настройка v14](#ade-bootstrap-v14) и [миграции v13→v14](#ade-migration-v14)):** пользователь описывает задачу Codex, Claude Code, Zed или Orca, а агент самостоятельно выполняет диагностику и настройку через установленный `gpp`. Установка и обновление навыков **всегда требуют явного подтверждения**. Есть также терминальный мастер вопросов `gpp wizard` для первого запуска без агента.
 
-### Архитектура: один глобальный каталог, выбор по проектам {#ade-v15-architecture}
+### Архитектура: источники и проектные копии {#ade-v15-architecture}
 
-<div class="diagram"><div class="diagram-title">Рисунок 12. Управление навыками: глобальная установка, проектный выбор и обновления</div><div class="flowboxes stack"><div class="node accent">Пользователь → Orca / Codex / Claude / Zed<small>«Настрой этот проект», «Проверь обновления», «Включи навыки тестирования»</small></div><div style="font-size:20px;color:#64748b">↓ короткий опрос, согласование действий</div><div class="node">Глобальный go-platform-bootstrap + проектный go-project-platform-manager<small>Инвентаризация · профиль · подтверждение · проверка SHA</small></div><div style="font-size:20px;color:#64748b">↓ чтение глобального каталога только после согласия</div><div class="node">~/.agents/skills · ~/.claude/skills<small>Глобальные Go · Protobuf · React · Wails · AI SDK · Orca · Graphify</small></div><div style="font-size:20px;color:#64748b">↕ проект использует только выбранные глобальные навыки</div><div class="node accent">Git-проект: AGENTS.md + lock.json + ignored .go-product-platform/<small>Активный профиль · управляющий навык проекта · Руководство · граф Graphify · никакого дублирования глобальных навыков</small></div></div></div>
+<div class="diagram"><div class="diagram-title">Рисунок 12. Управление навыками: глобальная установка, проектный выбор и обновления</div><div class="flowboxes stack"><div class="node accent">Пользователь → Orca / Codex / Claude / Zed<small>«Настрой этот проект», «Проверь обновления», «Включи навыки тестирования»</small></div><div style="font-size:20px;color:#64748b">↓ короткий опрос, согласование действий</div><div class="node">Глобальный go-platform-bootstrap + проектный go-project-platform-manager<small>Инвентаризация · профиль · подтверждение · проверка SHA</small></div><div style="font-size:20px;color:#64748b">↓ чтение глобального каталога только после согласия</div><div class="node">~/.agents/skills · ~/.claude/skills<small>Глобальные Go · Protobuf · React · Wails · AI SDK · Orca · Graphify</small></div><div style="font-size:20px;color:#64748b">↓ согласованная установка проектных копий</div><div class="node accent">Git-проект: AGENTS.md + lock.json + ignored .go-product-platform/<small>Активный профиль · управляющий навык проекта · Руководство · граф Graphify · skills, agents и references в .agents и .claude под Git</small></div></div></div>
 
-Наличие навыка в глобальном каталоге не означает его обязательное применение. Каждый продукт фиксирует список активных глобальных навыков в **отслеживаемом** `go-product-platform.lock.json`. Инструкции одного продукта не распространяются на другой. Реализации проектных уникальных навыков остаются под `.go-product-platform/project-skills/` и не публикуются глобально автоматически.
+Наличие навыка в глобальном каталоге не означает его обязательное применение. Каждый продукт фиксирует список активных глобальных навыков в **отслеживаемом** `go-product-platform.lock.json`. Инструкции одного продукта не распространяются на другой. Проектные навыки хранятся в `.agents/skills/` и `.claude/skills/` под Git и не публикуются глобально автоматически.
 
 | Где располагается | Содержимое | Версионирование |
 |---|---|---|
@@ -179,7 +179,7 @@ gpp doctor --project . --strict
 | `~/.agents/go-product-platform/` | Git снимки, история обновлений, global-skills.lock.json | SHA каждого источника |
 | `my-product/go-product-platform.lock.json` | Версия платформы, профиль, список активных имен | Отслеживается Git |
 | `my-product/.go-product-platform/` | Руководство, конфигурация, активные навыки, локальный управляющий навык | Игнорируется Git |
-| `my-product/AGENTS.md`, `CLAUDE.md` | Малый bridge к глобальных навыков и локальному manager навык | Отслеживается Git |
+| `my-product/AGENTS.md`, `CLAUDE.md` | Русские правила workflow и приоритета проектных навыков | Отслеживается Git |
 
 ### Сценарий первого запуска: мастер вопросов {#ade-v15-wizard}
 
@@ -188,7 +188,7 @@ gpp doctor --project . --strict
 1. Показать категории: Серверная часть на Go, PostgreSQL, Protobuf/Buf, Wails, React/shadcn, тесты, iOS/Android, AI SDK, Graphify и Orca.
 2. Спросить разрешение прочитать только списки `SKILL.md` в двух глобальных каталогах. Если пользователь отказался, проверку пропустить.
 3. Предложить профиль `go-api`, `web`, `desktop`, `mobile-native`, `ai` или `custom` и вывести имена и краткие описания входящих навыков.
-4. Предложить включить дополнительные глобальные навыки в выбранный проект. **Активация не копирует файлы в проект.**
+4. Предложить включить дополнительные глобальные навыки в выбранный проект. После выбора и согласования установить проектные копии через `skills-project --approve`.
 5. При согласии проверить отсутствующие навыки, показать источники GitHub; **отдельно запросить разрешение** на глобальную установку конкретных навыков.
 6. Отдельно предложить **только проверку** обновлений на GitHub (сетевой запрос). При наличии версий показать текущий и предлагаемый commit SHA.
 7. Вывести итоговый план и запросить финальное согласие. Отказ отменяет изменения и в проекте, и в глобальных каталогах.
@@ -307,7 +307,7 @@ gpp doctor --project . --strict
 |---|---|
 | Пользователь отменил опросник | Никаких изменений в проекте или глобальных навыков |
 | Пользователь отказал в чтении global каталогов | Нет проверки каталогов в опроснике |
-| Навык активирован для проекта | Изменился только project lock и локальная сводка, глобальные навыки не копируются |
+| Навык активирован для проекта | Выбор записан в project lock; после согласования skills-project устанавливает проектные копии |
 | Глобальный навык отсутствует | Отображается статус, установка только с отдельным подтверждением |
 | User запросил «проверь обновления» | Только JSON-план и SHA, обновления не применяются |
 | Upstream изменился после проверки | Отказ обновления, требуется новый план |

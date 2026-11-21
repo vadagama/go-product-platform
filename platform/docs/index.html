@@ -155,8 +155,8 @@ Compose</a>
 <a class="nav-link nav-sub" href="#skills-optional-platform" data-search="опциональные ai-функции и полностью
 нативные клиенты">Опциональные AI-функции и полностью
 нативные клиенты</a>
-<a class="nav-link nav-sub" href="#skills-agents" data-search="глобальная установка: codex, claude, zed и
-orca">Глобальная установка: Codex, Claude, Zed и
+<a class="nav-link nav-sub" href="#skills-agents" data-search="проектная установка: codex, claude, zed и
+orca">Проектная установка: Codex, Claude, Zed и
 Orca</a>
 <a class="nav-link nav-sub" href="#skills-routing" data-search="маршрутизация навыков по типу изменения">Маршрутизация навыков по типу изменения</a>
 <a class="nav-link nav-sub" href="#skills-governance" data-search="политика доверия и управления версиями">Политика доверия и управления версиями</a>
@@ -184,9 +184,9 @@ Orca</a>
 <a class="nav-link " href="#ade-skills-manager-v15" data-search="ade v15: интерактивная установка и
 управление навыками ии через агента">ADE v15: интерактивная установка и
 управление навыками ИИ через агента</a>
-<a class="nav-link nav-sub" href="#ade-v15-architecture" data-search="архитектура: один глобальный каталог,
-выбор по проектам">Архитектура: один глобальный каталог,
-выбор по проектам</a>
+<a class="nav-link nav-sub" href="#ade-v15-architecture" data-search="архитектура: источники и проектные
+копии">Архитектура: источники и проектные
+копии</a>
 <a class="nav-link nav-sub" href="#ade-v15-wizard" data-search="сценарий первого запуска: мастер вопросов">Сценарий первого запуска: мастер вопросов</a>
 <a class="nav-link nav-sub" href="#ade-v15-manager-skill" data-search="проектный skill-manager: агент
 обслуживает платформу">Проектный skill-manager: агент
@@ -4294,66 +4294,29 @@ RustFS: они предназначены преимущественно для 
 Отдельные навыки по React Native/Expo подключаются только при реальном
 выборе этой альтернативы, чтобы не конфликтовать с Wails/native
 стратегией.</p>
-<h3 id="skills-agents">Глобальная установка: Codex, Claude, Zed и
+<h3 id="skills-agents">Проектная установка: Codex, Claude, Zed и
 Orca</h3>
-<p><strong>Стандарт v14:</strong> все выбранные общие навыки
-устанавливаются <strong>один раз на Mac</strong>, а не копируются в
-каждый продукт. На машине с учётной записью <code>olegkrasnov</code>
-используются два каталога:</p>
-<table>
-<colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-</colgroup>
-<thead>
-<tr>
-<th>Агентная среда</th>
-<th>Общий каталог навыков</th>
-<th>Проектный контекст</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Codex</strong></td>
-<td><code>/Users/olegkrasnov/.agents/skills/&lt;name&gt;/SKILL.md</code></td>
-<td>Короткий корневой <code>AGENTS.md</code> и локальное
-руководство</td>
-</tr>
-<tr>
-<td><strong>Zed Agent</strong></td>
-<td><code>~/.agents/skills/&lt;name&gt;/SKILL.md</code></td>
-<td>Корневой <code>AGENTS.md</code>; встроенные и внешние агенты имеют
-разные способы загрузки</td>
-</tr>
-<tr>
-<td><strong>Claude Code</strong></td>
-<td><code>/Users/olegkrasnov/.claude/skills/&lt;name&gt;/SKILL.md</code></td>
-<td>Корневой <code>CLAUDE.md</code> с ссылкой на
-<code>AGENTS.md</code></td>
-</tr>
-<tr>
-<td><strong>Orca ADE</strong></td>
-<td>Глобальные каталоги Codex/Claude + глобальные Orca навыки</td>
-<td><code>orca.yaml</code> для worktrees; использует навыки того агента,
-который исполняет задачу</td>
-</tr>
-</tbody>
-</table>
-<p><strong>При создании нового проекта не устанавливается ни один общий
-навык уровня проекта.</strong> Инструкции и выбранные GitHub-источники
-перечислены в разделе <a href="#ade-bootstrap-v14">Глобальная модель
-установки</a>. Собственные проектные навыки могут появиться только в
-контексте конкретного продукта по явному решению. Глобально
-установленные навыки не следует автоматически загружать все в контекст
-LLM — выбираются только релевантные задаче.</p>
-<p>Официальный <a href="https://orca.dev/docs/cli/skills">каталог
-Orca</a> позволяет устанавливать короткие навыки, соответствующие версии
-в профиль пользователя. После установки их можно видеть в глобальных
-каталогах, без дублирования в проекте. Для Graphify также предусмотрен
-<strong>глобальный</strong>
-<code>graphify install --platform agents</code> и
-<code>--platform claude</code>, без флага <code>--project</code>.</p>
+<p>Bootstrap и внешние CLI устанавливаются на машину. При настройке
+продукта агент показывает для согласования таблицу навыков (назначение,
+источник, версия и пути), списки агентов и референсов. Одобренный набор
+копируется в <code>.agents/</code> и <code>.claude/</code> и
+отслеживается в Git. Проектные версии имеют приоритет над
+глобальными.</p>
+<p>В оба каталога устанавливаются <code>skills/</code>,
+<code>agents/</code> и <code>references/</code>, включая
+software-development-workflow и его шаблоны. Происхождение, SHA и
+контрольные суммы фиксируются в
+<code>go-product-platform.lock.json</code>. Глобальное обновление не
+меняет копии продукта. Применяйте только навыки, относящиеся к
+задаче.</p>
+<p><code>AGENTS.md</code> и <code>CLAUDE.md</code> на русском требуют
+соблюдать флоу software-development-workflow. <code>MANUAL.md</code>
+описывает настройку, запуск и проверки. <code>init --offline</code>
+восстанавливает локальные материалы платформы; полная установка
+проектного набора выполняется согласованным
+<code>init --setup-plan --approve</code> или
+<code>skills-project --approve</code> после подготовки выбранных
+источников.</p>
 <h3 id="skills-routing">Маршрутизация навыков по типу изменения</h3>
 <table>
 <colgroup>
@@ -4535,11 +4498,12 @@ macOS-пользователя. При создании нового проек�
 · ~/.claude/skills · Graphify · Addy Osmani · Orca · Go/UI/API</small>
 </div>
 <div style="font-size:20px;color:#64748b">
-↓ поиск навыков агентом по задаче, без копирования
+↓ согласование и копирование выбранного набора в .agents и .claude
+продукта
 </div>
 <div class="node">
-Codex · Claude · Zed · Orca<small>Глобальные навыки · общая версия
-источников на этой машине</small>
+Codex · Claude · Zed · Orca<small>Проектные навыки, агенты и референсы ·
+версии в Git продукта</small>
 </div>
 <div style="font-size:20px;color:#64748b">
 ↓ новый Git worktree → gpp init –offline
@@ -4748,8 +4712,8 @@ Zed или Orca, а агент самостоятельно выполняет �
 <strong>всегда требуют явного подтверждения</strong>. Есть также
 терминальный мастер вопросов <code>gpp wizard</code> для первого запуска
 без агента.</p>
-<h3 id="ade-v15-architecture">Архитектура: один глобальный каталог,
-выбор по проектам</h3>
+<h3 id="ade-v15-architecture">Архитектура: источники и проектные
+копии</h3>
 <div class="diagram">
 <div class="diagram-title">
 Рисунок 12. Управление навыками: глобальная установка, проектный выбор и
@@ -4776,13 +4740,13 @@ go-project-platform-manager<small>Инвентаризация · профиль
 React · Wails · AI SDK · Orca · Graphify</small>
 </div>
 <div style="font-size:20px;color:#64748b">
-↕ проект использует только выбранные глобальные навыки
+↓ согласованная установка проектных копий
 </div>
 <div class="node accent">
 Git-проект: AGENTS.md + lock.json + ignored
 .go-product-platform/<small>Активный профиль · управляющий навык проекта
-· Руководство · граф Graphify · никакого дублирования глобальных
-навыков</small>
+· Руководство · граф Graphify · skills, agents и references в .agents и
+.claude под Git</small>
 </div>
 </div>
 </div>
@@ -4790,8 +4754,8 @@ Git-проект: AGENTS.md + lock.json + ignored
 применение. Каждый продукт фиксирует список активных глобальных навыков
 в <strong>отслеживаемом</strong>
 <code>go-product-platform.lock.json</code>. Инструкции одного продукта
-не распространяются на другой. Реализации проектных уникальных навыков
-остаются под <code>.go-product-platform/project-skills/</code> и не
+не распространяются на другой. Проектные навыки хранятся в
+<code>.agents/skills/</code> и <code>.claude/skills/</code> под Git и не
 публикуются глобально автоматически.</p>
 <table>
 <colgroup>
@@ -4835,7 +4799,7 @@ Git-проект: AGENTS.md + lock.json + ignored
 </tr>
 <tr>
 <td><code>my-product/AGENTS.md</code>, <code>CLAUDE.md</code></td>
-<td>Малый bridge к глобальных навыков и локальному manager навык</td>
+<td>Русские правила workflow и приоритета проектных навыков</td>
 <td>Отслеживается Git</td>
 </tr>
 </tbody>
@@ -4854,7 +4818,8 @@ Wails, React/shadcn, тесты, iOS/Android, AI SDK, Graphify и Orca.</li>
 <code>custom</code> и вывести имена и краткие описания входящих
 навыков.</li>
 <li>Предложить включить дополнительные глобальные навыки в выбранный
-проект. <strong>Активация не копирует файлы в проект.</strong></li>
+проект. После выбора и согласования установить проектные копии через
+<code>skills-project --approve</code>.</li>
 <li>При согласии проверить отсутствующие навыки, показать источники
 GitHub; <strong>отдельно запросить разрешение</strong> на глобальную
 установку конкретных навыков.</li>
@@ -5057,8 +5022,8 @@ gpp doctor --project . --strict</code></pre></details>
 </tr>
 <tr>
 <td>Навык активирован для проекта</td>
-<td>Изменился только project lock и локальная сводка, глобальные навыки
-не копируются</td>
+<td>Выбор записан в project lock; после согласования skills-project
+устанавливает проектные копии</td>
 </tr>
 <tr>
 <td>Глобальный навык отсутствует</td>

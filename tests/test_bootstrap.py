@@ -35,6 +35,8 @@ class BootstrapTests(unittest.TestCase):
         (self.repo / 'skills/one/SKILL.md').write_text('---\nname: one\ndescription: Test one\n---\n')
         (self.repo / 'skills/two/SKILL.md').write_text('---\nname: two\ndescription: Test two\n---\n')
         (self.repo / 'references/guide.md').write_text('Shared references')
+        (self.repo / 'docs').mkdir()
+        (self.repo / 'docs/workflow.md').write_text('Workflow fixture')
         subprocess.run(['git','init','-q',str(self.repo)],check=True)
         subprocess.run(['git','-C',str(self.repo),'config','user.email','test@example.test'],check=True)
         subprocess.run(['git','-C',str(self.repo),'config','user.name','test'],check=True)
@@ -43,7 +45,7 @@ class BootstrapTests(unittest.TestCase):
         self.manifest = self.root / 'global-skills.json'
         self.manifest.write_text(json.dumps({'manifest_version':'15.0.0','sources':[
             {'key':'testrepo','repo':str(self.repo), 'skills':{'one':'skills/one','two':'skills/two'},'references':'references'}
-        ]}))
+        ], 'workflow': {'key': 'workflow', 'repo': str(self.repo), 'skills': {}, 'references': 'docs'}}))
 
     def call(self, *args, check=True):
         return subprocess.run([sys.executable,str(SCRIPT),*args],env=self.env,check=check,text=True,capture_output=True)
@@ -51,15 +53,73 @@ class BootstrapTests(unittest.TestCase):
     def global_skills(self):
         self.call('setup-global','--skills','--manifest',str(self.manifest))
 
+    def prepare_project_assets(self):
+        self.global_skills()
+        self.call('init', '--project', str(self.project), '--offline')
+        lockpath = self.project / 'go-product-platform.lock.json'
+        lock = json.loads(lockpath.read_text())
+        lock['enabled_global_skills'] = ['one']
+        lockpath.write_text(json.dumps(lock))
+        return ('skills-project', '--project', str(self.project), '--manifest', str(self.manifest))
+
+    def test_project_asset_review_install_portability_and_manual(self):
+        args = self.prepare_project_assets()
+        review = json.loads(self.call(*args, '--json').stdout)
+        self.assertEqual(review['skills'][0]['name'], 'one')
+        self.assertFalse((self.project / '.agents').exists())
+        self.call(*args, '--approve')
+        manual = self.project / 'MANUAL.md'
+        manual.write_text(manual.read_text() + '\nРучные команды запуска\n')
+        self.call(*args, '--approve')
+        for root in ('.agents', '.claude'):
+            self.assertFalse((self.project / root / 'skills/one').is_symlink())
+            self.assertTrue((self.project / root / 'references/guide.md').is_file())
+            self.assertTrue((self.project / root / 'references/software-development-workflow/docs/workflow.md').is_file())
+            self.assertTrue((self.project / root / 'agents/product-reviewer.md').is_file())
+        shutil.rmtree(self.home / '.agents')
+        shutil.rmtree(self.home / '.claude')
+        self.call('init', '--project', str(self.project), '--offline')
+        self.call('doctor', '--project', str(self.project), '--strict')
+        self.assertIn('Ручные команды запуска', manual.read_text())
+        for name in ('AGENTS.md', 'CLAUDE.md'):
+            self.assertIn('имеют приоритет', (self.project / name).read_text())
+            self.assertIn('Обязательно соблюдайте флоу', (self.project / name).read_text())
+
+    def test_project_assets_preserve_edits_and_preflight_both_roots(self):
+        args = self.prepare_project_assets()
+        conflict = self.project / '.claude/skills/one/SKILL.md'
+        conflict.parent.mkdir(parents=True)
+        conflict.write_text('user content')
+        failure = self.call(*args, '--approve', check=False)
+        self.assertNotEqual(failure.returncode, 0)
+        self.assertEqual(conflict.read_text(), 'user content')
+        self.assertFalse((self.project / '.agents').exists())
+        conflict.unlink()
+        self.call(*args, '--approve')
+        conflict.write_text('edited after install')
+        self.assertNotEqual(self.call(*args, '--approve', check=False).returncode, 0)
+        self.assertEqual(conflict.read_text(), 'edited after install')
+        self.assertNotEqual(self.call('doctor', '--project', str(self.project), '--strict', check=False).returncode, 0)
+
+    def test_project_assets_reject_destination_symlink(self):
+        args = self.prepare_project_assets()
+        outside = self.root / 'outside-assets'
+        outside.mkdir()
+        (self.project / '.claude').symlink_to(outside, target_is_directory=True)
+        self.assertNotEqual(self.call(*args, '--approve', check=False).returncode, 0)
+        self.assertEqual(list(outside.iterdir()), [])
+        self.assertFalse((self.project / '.agents').exists())
+
     def test_project_init_never_installs_shared_skills(self):
         self.call('init','--project',str(self.project),'--offline')
+        self.assertFalse((self.project / 'AGENT.md').exists())
         self.assertTrue((self.project/'.go-product-platform/docs/index.html').is_file())
         self.assertFalse((self.project/'.agents/skills').exists())
         self.assertFalse((self.project/'.claude/skills').exists())
         self.assertFalse((self.project/'.go-product-platform/vendor').exists())
         self.assertFalse((self.project/'.go-product-platform/skills').exists())
         self.assertTrue((self.project/'.go-product-platform/project-skills').is_dir())
-        self.assertIn('user-global',(self.project/'go-product-platform.lock.json').read_text())
+        self.assertIn('project-local',(self.project/'go-product-platform.lock.json').read_text())
         self.assertEqual((self.project/'.gitignore').read_text().count('/.go-product-platform/'),1)
         self.assertEqual(subprocess.run(['git','-C',str(self.project),'check-ignore','-q','.go-product-platform/docs/index.html']).returncode,0)
 
@@ -104,6 +164,30 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('My rules',(self.project/'AGENTS.md').read_text())
         self.assertEqual((self.project/'orca.yaml').read_text(),'scripts:\n  setup: |\n    echo my command\n')
         self.assertTrue((self.project/'.go-product-platform/orca-integration.yaml').exists())
+
+    def test_agent_bridges_are_russian_on_init_and_refresh(self):
+        self.call('init', '--project', str(self.project), '--offline')
+        expected = {
+            'AGENTS.md': 'software-development-workflow',
+            'CLAUDE.md': 'software-development-workflow',
+        }
+        generated = {}
+        for name, phrase in expected.items():
+            generated[name] = (self.project / name).read_text('utf-8')
+            self.assertIn(phrase, generated[name])
+            (self.project / name).write_text(
+                '# Правила команды\n\n<!-- GPP:BEGIN -->\nOld English bridge\n'
+                '<!-- GPP:END -->\n\nДополнительные правила.\n', encoding='utf-8')
+
+        self.call('init', '--project', str(self.project), '--offline')
+        refreshed = {}
+        for name in expected:
+            refreshed[name] = (self.project / name).read_text('utf-8')
+            self.assertEqual(refreshed[name], '# Правила команды\n\n' +
+                             generated[name].rstrip('\n') + '\n\nДополнительные правила.\n')
+        self.call('init', '--project', str(self.project), '--offline')
+        for name in expected:
+            self.assertEqual((self.project / name).read_text('utf-8'), refreshed[name])
 
     def test_v13_migrate_removes_only_old_generated_links(self):
         self.global_skills()
@@ -232,10 +316,13 @@ class BootstrapTests(unittest.TestCase):
         lock = json.loads((self.project / 'go-product-platform.lock.json').read_text())
         for name in lock['enabled_global_skills']:
             for agent in ('.agents', '.claude'):
-                skill = self.home / agent / 'skills' / name
+                skill = self.project / agent / 'skills' / name
                 if not skill.exists():
                     skill.mkdir(parents=True)
                     (skill / 'SKILL.md').write_text('fixture')
+        import hashlib
+        lock['project_assets'] = {'files': {f'skills/{name}/SKILL.md': hashlib.sha256(b'fixture').hexdigest() for name in lock['enabled_global_skills']}}
+        (self.project / 'go-product-platform.lock.json').write_text(json.dumps(lock))
         self.call('doctor', '--project', str(self.project), '--ready')
         valid_tool = plan['tools'][0]['argv']
         plan['tools'][0]['argv'] = ['gpp-test-missing-executable']
@@ -280,6 +367,11 @@ class BootstrapTests(unittest.TestCase):
             skill = self.home / agent / 'skills/graphify'
             skill.mkdir(parents=True)
             (skill / 'SKILL.md').write_text('fixture')
+        self.call('init', '--project', str(self.project), '--offline')
+        self.call('skills-activate', '--project', str(self.project), '--names', 'graphify,go-platform-bootstrap', '--approve')
+        lockpath = self.project / 'go-product-platform.lock.json'
+        lock = json.loads(lockpath.read_text()); lock['enabled_global_skills'].append('one'); lockpath.write_text(json.dumps(lock))
+        plan['agent_assets'] = json.loads(self.call('skills-project', '--project', str(self.project), '--manifest', str(self.manifest), '--json').stdout)
         path = self.root / 'plan.json'
         path.write_text(json.dumps(plan))
         args = ('init', '--project', str(self.project), '--setup-plan', str(path),
@@ -455,8 +547,10 @@ class BootstrapTests(unittest.TestCase):
                                    str(self.project), '--allow-pipe'], env=self.env,
                                   text=True, capture_output=True,
                                   input=f'n\n2\n\n{source}\n{answer}\n')
-            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertEqual(proc.returncode == 0, answer == 'n', proc.stderr)
             self.assertEqual((self.project / 'canvas-installed').exists(), answer == 'y')
+            if answer == 'y':
+                self.assertIn('Install selected skill', proc.stderr)
 
     def test_canvas_missing_source_and_offline_init(self):
         failure = self.call('canvas-install', '--project', str(self.project),
@@ -478,11 +572,12 @@ class BootstrapTests(unittest.TestCase):
         self.assertFalse((self.project / 'go-product-platform.lock.json').exists())
         self.assertFalse((self.project / 'AGENTS.md').exists())
 
-    def test_wizard_can_activate_without_global_installation(self):
+    def test_wizard_reports_missing_assets_without_global_installation(self):
         proc = subprocess.run([sys.executable, str(SCRIPT), 'wizard', '--project', str(self.project),
                                '--allow-pipe'],
                               env=self.env, text=True, capture_output=True, input='n\n1\n\n\ny\n')
-        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn('Install selected skill', proc.stderr)
         lock = json.loads((self.project / 'go-product-platform.lock.json').read_text())
         self.assertEqual(lock['skills_profile'], 'go-api')
         self.assertTrue((self.project / '.go-product-platform/project-skills/go-project-platform-manager/SKILL.md').exists())
