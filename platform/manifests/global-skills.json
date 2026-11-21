@@ -1,0 +1,155 @@
+{
+  "manifest_version": "15.0.0",
+  "policy": "Install once in ~/.agents/skills and ~/.claude/skills. No shared skill is installed into projects.",
+  "sources": [
+    {
+      "key": "addyosmani",
+      "repo": "https://github.com/addyosmani/agent-skills.git",
+      "skills": {
+        "spec-driven-development": "skills/spec-driven-development",
+        "test-driven-development": "skills/test-driven-development",
+        "incremental-implementation": "skills/incremental-implementation",
+        "code-review-and-quality": "skills/code-review-and-quality",
+        "code-simplification": "skills/code-simplification",
+        "source-driven-development": "skills/source-driven-development",
+        "security-and-hardening": "skills/security-and-hardening"
+      },
+      "references": "references"
+    },
+    {
+      "key": "superpowers",
+      "repo": "https://github.com/obra/superpowers.git",
+      "skills": {
+        "verification-before-completion": "skills/verification-before-completion",
+        "systematic-debugging": "skills/systematic-debugging",
+        "using-git-worktrees": "skills/using-git-worktrees"
+      }
+    },
+    {
+      "key": "samber-go",
+      "repo": "https://github.com/samber/cc-skills-golang.git",
+      "skills": {
+        "golang-design-patterns": "skills/golang-design-patterns",
+        "golang-database": "skills/golang-database",
+        "golang-testing": "skills/golang-testing",
+        "golang-concurrency": "skills/golang-concurrency",
+        "golang-security": "skills/golang-security"
+      }
+    },
+    {
+      "key": "go-architecture",
+      "repo": "https://github.com/eduardo-sl/go-agent-skills.git",
+      "skills": {
+        "go-architecture-review": "skills/(architecture)/go-architecture-review"
+      }
+    },
+    {
+      "key": "buf-protobuf",
+      "repo": "https://github.com/bufbuild/claude-plugins.git",
+      "skills": {
+        "protobuf": "plugins/protobuf/skills/protobuf"
+      }
+    },
+    {
+      "key": "wails",
+      "repo": "https://github.com/spf13/go-skills.git",
+      "skills": {
+        "wails": "wails"
+      }
+    },
+    {
+      "key": "shadcn",
+      "repo": "https://github.com/shadcn-ui/ui.git",
+      "skills": {
+        "shadcn": "skills/shadcn"
+      }
+    },
+    {
+      "key": "vercel-react",
+      "repo": "https://github.com/vercel-labs/agent-skills.git",
+      "skills": {
+        "react-best-practices": "skills/react-best-practices",
+        "composition-patterns": "skills/composition-patterns",
+        "web-design-guidelines": "skills/web-design-guidelines"
+      }
+    },
+    {
+      "key": "tanstack-query",
+      "repo": "https://github.com/axross/skills.git",
+      "skills": {
+        "tanstack-query-development": "skills/tanstack-query-development"
+      }
+    },
+    {
+      "key": "tailwind-design",
+      "repo": "https://github.com/wshobson/agents.git",
+      "skills": {
+        "tailwind-design-system": "plugins/frontend-mobile-development/skills/tailwind-design-system"
+      }
+    },
+    {
+      "key": "microsoft-playwright",
+      "repo": "https://github.com/microsoft/playwright-cli.git",
+      "skills": {
+        "playwright-cli": "skills/playwright-cli"
+      }
+    },
+    {
+      "key": "microsoft-accessibility",
+      "repo": "https://github.com/microsoft/a11y-llm-eval.git",
+      "skills": {
+        "building-accessible-ui": "config/skills/building-accessible-ui"
+      }
+    },
+    {
+      "key": "vercel-ai",
+      "repo": "https://github.com/vercel/ai.git",
+      "skills": {
+        "ai-sdk": "skills/use-ai-sdk"
+      }
+    },
+    {
+      "key": "vercel-ai-elements",
+      "repo": "https://github.com/vercel/ai-elements.git",
+      "skills": {
+        "ai-elements": "skills/ai-elements"
+      }
+    },
+    {
+      "key": "swiftui",
+      "repo": "https://github.com/AvdLee/SwiftUI-Agent-Skill.git",
+      "skills": {
+        "swiftui-expert-skill": "skills/swiftui-expert-skill"
+      }
+    },
+    {
+      "key": "swift-concurrency",
+      "repo": "https://github.com/AvdLee/Swift-Concurrency-Agent-Skill.git",
+      "skills": {
+        "swift-concurrency": "skills/swift-concurrency"
+      }
+    },
+    {
+      "key": "android",
+      "repo": "https://github.com/android/skills.git",
+      "skills": {
+        "jetpack-compose-performance": "jetpack-compose/jetpack-compose-performance",
+        "testing-setup": "testing/testing-setup"
+      }
+    },
+    {
+      "key": "oauth",
+      "repo": "https://github.com/citypaul/.dotfiles.git",
+      "skills": {
+        "secure-oauth-oidc": "claude/.claude/skills/secure-oauth-oidc"
+      }
+    },
+    {
+      "key": "openbao",
+      "repo": "https://github.com/Getty/p5-www-openbao.git",
+      "skills": {
+        "openbao-general": ".claude/skills/openbao-general"
+      }
+    }
+  ]
+}

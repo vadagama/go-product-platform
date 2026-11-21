@@ -1,0 +1,3 @@
+interface:
+  display_name: Go Platform Bootstrap
+  short_description: Инициализация Go-first проектов в Orca ADE

@@ -1,0 +1,22 @@
+profile: go-fullstack
+version: 13.0.0
+local_development:
+  runtime: native
+  backend: go
+  frontend: vite-react
+  database: postgresql
+  worktrees:
+    isolation: [database, ports, logs, e2e-artifacts]
+    e2e: local-background
+architecture:
+  style: modular-monolith
+  contracts: protobuf-buf-connect
+  desktop: wails3
+  mobile: native-if-wails-mobile-unfit
+production:
+  primary: vm-docker-compose
+  secondary: kubernetes
+skills:
+  addyosmani: curated-with-full-references
+  graphify: local-graph
+  orca: user-global
