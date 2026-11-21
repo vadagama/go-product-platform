@@ -2,8 +2,8 @@
 title: "Встроенные возможности монолита"
 description: "Надёжные фоновые задачи на River, машины состояний (FSM) с транзакционной историей, product analytics внутри PostgreSQL, feature flags, поиск через FTS + pg_trgm и уведомления."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 8
 source: "handbook.md §31–§36"
 tags: [river, jobs, fsm, state-machine, analytics, usage-events, feature-flags, search, pg-trgm, notifications, webhooks]

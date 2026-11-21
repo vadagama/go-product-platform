@@ -2,8 +2,8 @@
 title: "Тестовая стратегия и контрольные проверки качества"
 description: "Семь уровней контроля качества от статических проверок до базовых проверок рабочей среды, базовые проверки качества Go, Анализ влияния изменений на тесты с помощью ИИ и распределение проверок между локальным циклом и CI."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 9
 source: "handbook.md §13"
 tags: [testing, quality-gates, go-test, playwright, vitest, govulncheck, e2e, ci]

@@ -2,8 +2,8 @@
 title: "Архитектура: границы и модульный монолит"
 description: "Архитектурные границы и слои, модель доменного инварианта, модульный Go-монолит без инфраструктурной избыточности, модуль ≠ плагин ≠ сервис, проверяемые инварианты, матрица возможностей и критерии выделения модуля в сервис."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 2
 source: "handbook.md §2, §26, §27, §43"
 tags: [architecture, modular-monolith, domain, invariants, capability-matrix, service-extraction]

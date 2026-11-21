@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Go Product Platform — Руководство по архитектуре</title><meta name="description" content="Руководство v15 с приоритетом Go: модульный монолит, локальные ИИ-агенты, навыки агентов, нативные рабочие деревья, фоновые E2E, PostgreSQL, Wails, Connect RPC, приоритет библиотек при развёртывании."><style>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Go Product Platform — Руководство по архитектуре</title><meta name="description" content="Руководство v17 с приоритетом Go: модульный монолит, локальные ИИ-агенты, навыки агентов, нативные рабочие деревья, фоновые E2E, PostgreSQL, Wails, Connect RPC, приоритет библиотек при развёртывании."><style>
 :root{--bg:#fff;--panel:#f9fafb;--paper:#fff;--ink:#172b3f;--muted:#64748b;--line:#dbe2e8;--link:#1769b0;--accent:#00a98f;--code:#152433;--codeink:#e7f0ff;--shadow:0 7px 20px #102b4412}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:28px}body{font:15px/1.68 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);margin:0}a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}.top{height:64px;position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:0 25px;background:var(--paper);border-bottom:1px solid var(--line)}.brand{font-weight:800;font-size:16px;white-space:nowrap;color:var(--ink)}.brand-mark{display:inline-flex;background:var(--accent);height:26px;width:26px;border-radius:6px;color:white;align-items:center;justify-content:center;margin-right:8px}.brand small{color:var(--muted);font-size:11px;margin-left:8px;font-weight:500}.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}.button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit;font-size:12px}.button:hover{border-color:var(--link)}.app{display:grid;grid-template-columns:285px minmax(0,950px) minmax(0,1fr);min-height:calc(100vh - 64px)}aside{border-right:1px solid var(--line);background:var(--panel);padding:20px 12px 25px 18px;position:sticky;top:64px;height:calc(100vh - 64px);overflow:auto}.search{width:100%;padding:10px 12px;border:1px solid var(--line);outline:none;background:var(--paper);color:var(--ink);border-radius:8px;font-size:13px;margin-bottom:18px}.nav-heading{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);font-weight:800;margin:14px 8px 10px}.nav-link{display:block;font-size:12.5px;line-height:1.4;padding:7px 10px;border-radius:7px;color:var(--ink);margin-bottom:2px}.nav-link.active,.nav-link:hover{background:#e6edf5;color:#15558e;text-decoration:none}.nav-sub{font-size:11.5px;padding-left:23px;color:var(--muted)}main{padding:47px 55px 95px;max-width:1000px;width:100%}.article h1{font-size:37px;letter-spacing:-1.4px;line-height:1.13;margin:0 0 20px;font-weight:800}.article h2{font-size:24px;letter-spacing:-.6px;margin:48px 0 17px;line-height:1.25;border-top:1px solid var(--line);padding-top:28px}.article h3{font-size:17px;margin:29px 0 10px;line-height:1.35}.article p{margin:11px 0 16px}.article p:first-of-type{color:var(--muted)}.article blockquote{margin:24px 0;background:#f6f9fc;border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px}.article blockquote p{color:var(--ink)!important;margin:0}.article strong{font-weight:700}.article table{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;margin:16px 0 25px;border:1px solid var(--line);border-radius:9px;overflow:hidden;display:table}.article th{background:#eff3f7;color:#324b65;text-align:left;font-weight:700;font-size:12px}.article th,.article td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}.article tr:last-child td{border-bottom:0}.article tr:hover td{background:rgba(120,160,195,.06)}.article ul,.article ol{padding-left:24px}.article li{margin:5px 0}.codeblock{font-size:12px;line-height:1.65;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--code);color:var(--codeink);padding:20px;overflow:auto;border-radius:9px;margin:10px 0 24px;white-space:pre;tab-size:2}.copy-code{display:block;position:relative;float:right;margin:10px 10px -41px 0;z-index:2;background:#33475c;color:#edf5ff;border:1px solid #5c6f83;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px}.diagram{border:1px solid var(--line);border-radius:11px;padding:18px 16px;margin:22px 0 28px;background:#fcfdff;box-shadow:var(--shadow)}.diagram svg{width:100%;max-height:500px}.diagram-title{font-weight:750;font-size:13px;margin-bottom:13px}.diagram-note{font-size:12px;color:var(--muted);margin-top:9px}.flowboxes{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}.flowboxes.stack{flex-direction:column}.node{border:1px solid #a4b7c9;background:#ecf2f9;border-radius:9px;padding:14px 16px;min-width:170px;text-align:center;font-size:13px;font-weight:750}.node small{font-size:11px;display:block;margin-top:5px;font-weight:400;color:#64748b}.node.accent{background:#e8f5ec;border-color:#8ab99e}.footer-note{font-size:12px;color:var(--muted);margin-top:55px;padding-top:25px;border-top:1px solid var(--line)}.right{padding:30px 18px}.right-note{position:sticky;top:90px;max-width:220px;font-size:12px;color:var(--muted);line-height:1.6}.muted{color:var(--muted)}.codeblock code{color:inherit}.print-only{display:none}
 @media(max-width:1200px){.app{grid-template-columns:255px minmax(0,1fr)}.right{display:none}main{padding:40px 40px 90px}}@media(max-width:780px){.top{height:58px;padding:0 10px;gap:8px}.top-right{gap:5px}.top-right .button:last-child{display:none}.brand{font-size:14px}.brand-mark{margin-right:5px}.brand small{display:none}.app{display:block}aside{display:none;position:fixed;z-index:40;left:0;top:58px;width:285px;height:calc(100vh - 58px);box-shadow:var(--shadow)}aside.open{display:block}main{padding:25px 18px 70px}.article h1{font-size:29px}.article h2{font-size:21px;margin-top:35px}.article table{display:block;overflow-x:auto;white-space:normal}.article th,.article td{min-width:110px}.diagram{overflow:auto}.diagram svg{min-width:660px}.node{min-width:135px}.button{padding:6px 9px}}@media print{.top,aside,.right,.copy-code{display:none!important}.app{display:block}main{max-width:none;padding:0}.article h2{page-break-after:avoid}.diagram,.codeblock,table{break-inside:avoid}.codeblock{white-space:pre-wrap;color:#172b3f;background:#f1f4f7}a{color:var(--ink)}}
@@ -20,7 +20,7 @@
 main,.article{min-width:0;overflow-wrap:anywhere}
 .article :not(pre)>code{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 .article .code-accordion{max-width:100%}
-</style></head><body><header class="top"><button class="button" id="menu" aria-label="Меню">☰</button><a href="#" class="brand"><span class="brand-mark">G</span>Go Product Platform<small>Руководство по архитектуре / 15.0</small></a><div class="top-right"><button class="button" id="theme">◐ Тёмная</button><button class="button" onclick="window.print()">⎙ Печать / PDF</button></div></header><div class="app"><aside id="sidebar"><input id="search" class="search" placeholder="Найти раздел…" aria-label="Поиск разделов"><div class="nav-heading">Содержание</div><nav><a class="nav-link " href="#v11-start" data-search="основная модель работы v14: локальные агенты и
+</style></head><body><header class="top"><button class="button" id="menu" aria-label="Меню">☰</button><a href="#" class="brand"><span class="brand-mark">G</span>Go Product Platform<small>Руководство по архитектуре / 17.0</small></a><div class="top-right"><button class="button" id="theme">◐ Тёмная</button><button class="button" onclick="window.print()">⎙ Печать / PDF</button></div></header><div class="app"><aside id="sidebar"><input id="search" class="search" placeholder="Найти раздел…" aria-label="Поиск разделов"><div class="nav-heading">Содержание</div><nav><a class="nav-link " href="#v11-start" data-search="основная модель работы v14: локальные агенты и
 маленький бинарник">Основная модель работы v14: локальные агенты и
 маленький бинарник</a>
 <a class="nav-link " href="#decision" data-search="решение за одну минуту">Решение за одну минуту</a>
@@ -52,6 +52,7 @@ main,.article{min-width:0;overflow-wrap:anywhere}
 <a class="nav-link " href="#ui" data-search="разработка интерфейсов и дизайн-система">Разработка интерфейсов и дизайн-система</a>
 <a class="nav-link nav-sub" href="#ui-pipeline" data-search="процесс проверки качества интерфейса">Процесс проверки качества интерфейса</a>
 <a class="nav-link " href="#gpu" data-search="gpu, ml и производительность">GPU, ML и производительность</a>
+<a class="nav-link " href="#ui-canvas" data-search="canvas при настройке ui-проекта">Canvas при настройке UI-проекта</a>
 <a class="nav-link " href="#protocols" data-search="api: protobuf + buf + connect/grpc">API: Protobuf + Buf + Connect/gRPC</a>
 <a class="nav-link nav-sub" href="#proto-example" data-search="рекомендованный protobuf-контракт">Рекомендованный protobuf-контракт</a>
 <a class="nav-link nav-sub" href="#proto-compatibility" data-search="правила эволюции схем">Правила эволюции схем</a>
@@ -202,9 +203,21 @@ Orca</a>
 <a class="nav-link nav-sub" href="#repo-layout" data-search="минимальная эталонная структура репозитория">Минимальная эталонная структура репозитория</a>
 <a class="nav-link " href="#golden-path-v11" data-search="эталонный путь внедрения (v11)">Эталонный путь внедрения (v11)</a>
 <a class="nav-link " href="#sources" data-search="первоисточники и проверка утверждений">Первоисточники и проверка утверждений</a>
-<a class="nav-link " href="#sources-v11" data-search="первоисточники решений v11">Первоисточники решений v11</a></nav></aside><main><article class="article"><h1 id="top">Go Product Platform — руководство по архитектуре и
+<a class="nav-link " href="#sources-v11" data-search="первоисточники решений v11">Первоисточники решений v11</a>
+<a class="nav-link " href="#sdd-v17" data-search="процесс как руководство">Процесс как руководство</a>
+<a class="nav-link " href="#sdd-gates" data-search="последовательные этапы и условия готовности">Последовательные этапы и условия готовности</a>
+<a class="nav-link " href="#sdd-autonomy" data-search="риск, автономия и изменение объёма">Риск, автономия и изменение объёма</a>
+<a class="nav-link " href="#sdd-example" data-search="полный сценарий e2e-фичи">Полный сценарий E2E-фичи</a>
+<a class="nav-link " href="#sdd-evidence" data-search="доказательства и свежесть">Доказательства и свежесть</a>
+<a class="nav-link " href="#sdd-team" data-search="соло, команда и интеграция">Соло, команда и интеграция</a>
+<a class="nav-link " href="#sdd-enforcement" data-search="граница контроля и миграция">Граница контроля и миграция</a>
+<a class="nav-link " href="#artifact-layout" data-search="место документации и минимальная основа">Место документации и минимальная основа</a>
+<a class="nav-link " href="#artifact-frontmatter" data-search="yaml frontmatter v1">YAML frontmatter v1</a>
+<a class="nav-link " href="#artifact-impact" data-search="когда создавать и обновлять артефакт">Когда создавать и обновлять артефакт</a>
+<a class="nav-link " href="#artifact-debt" data-search="долг, инициативы и единый список задач">Долг, инициативы и единый список задач</a>
+<a class="nav-link " href="#artifact-validation" data-search="два уровня проверки">Два уровня проверки</a></nav></aside><main><article class="article"><h1 id="top">Go Product Platform — руководство по архитектуре и
 разработке с ИИ</h1>
-<p><strong>Версия 15.0 · 20 ноября 2026 · Go-first · Модульный монолит ·
+<p><strong>Версия 17.0 · 21 ноября 2026 · Go-first · Модульный монолит ·
 LOCAL-NATIVE / VM-first · Навыки агентов</strong></p>
 <p>Канонический источник — тематические документы в
 <code>platform/handbook/docs/</code>; эта страница собирается из них
@@ -1239,6 +1252,19 @@ real GPU для 2D/3D.</li>
 </tr>
 </tbody>
 </table>
+<h2 id="ui-canvas">Canvas при настройке UI-проекта</h2>
+<p><a href="https://gitlab16.skiftrade.kz/design/app-canvas">app-canvas</a> —
+опциональная среда разработки и просмотра UI. Предлагать её при
+настройке проекта с фронтэндом. <code>gpp wizard</code> принимает путь к
+проверенному клону; агент запускает
+<code>gpp canvas-install --project . --source &lt;clone&gt; --approve</code>.
+Официальный установщик создаёт локальный <code>.canvas/</code> и
+отслеживаемый <code>design/</code>; <code>--app &lt;path&gt;</code>
+подключает существующее приложение, <code>--kit &lt;kit&gt;</code>
+выбирает кит нового. Дизайн-спецификации связываются с
+<code>docs/specifications/</code>, инженерный workflow продукта остаётся
+обязательным. После установки выполнить
+<code>.canvas/board.py doctor</code> через Python.</p>
 <h1 id="doc-04">API, контракты и realtime</h1>
 <p><strong>В этом документе:</strong> <a href="#protocols">API: Protobuf
 + Buf + Connect/gRPC</a> · <a href="#proto-example">Рекомендованный
@@ -3269,6 +3295,11 @@ main и обязательным gate образует проверенный р
 должны править тот же worktree во время финального gate. Порядок merge
 описан в <a href="#verified-merge">Работе агентов</a>.</p>
 <h1 id="doc-11">Работа агентов и интеграция</h1>
+<blockquote>
+<p><strong>v16:</strong> порядок разработки и условия переходов задаёт
+<a href="#doc-19">SDD-процесс</a>; документацию продукта — <a href="#doc-20">контракт артефактов</a>. Исторические рекомендации ниже
+применяются в этих границах.</p>
+</blockquote>
 <p><strong>В этом документе:</strong> <a href="#agents">ИИ-агенты:
 параллельная работа и владение</a> · <a href="#agent-guardrails">Guardrails</a> · <a href="#agent-debug">Инструменты диагностики</a> · <a href="#agent-policy-v11">Политики агентов и контрольные проверки
 качества</a> · <a href="#agent-integration-v11">Соло и команда до
@@ -3957,6 +3988,11 @@ Prometheus/Grafana и Loki/Tempo либо другой существующий 
 криптографический журнал.</p>
 <h1 id="doc-14">Навыки ИИ: проверенный каталог для Codex, Claude, Zed и
 Orca</h1>
+<blockquote>
+<p><strong>v16:</strong> порядок разработки и условия переходов задаёт
+<a href="#doc-19">SDD-процесс</a>; документацию продукта — <a href="#doc-20">контракт артефактов</a>. Исторические рекомендации ниже
+применяются в этих границах.</p>
+</blockquote>
 <p><strong>В этом документе:</strong> <a href="#skills-core">Минимальный
 общий набор</a> · <a href="#skills-platform">Контракты, Wails 3 и
 клиентская часть</a> · <a href="#skills-testing">Тестирование в
@@ -3978,6 +4014,11 @@ AI-функции и нативные клиенты</a> · <a href="#skills-age
 разработчиком технологии; <strong>сообщество</strong> требует
 собственной проверки. Ссылка ведёт на GitHub-репозиторий или конкретный
 <code>SKILL.md</code>.</p>
+<p><strong>Graphify обязателен в наборе по умолчанию каждого
+проекта</strong>, включая <code>custom</code>: <a href="https://github.com/Graphify-Labs/graphify">источник</a>. Установка
+глобальная через
+<code>gpp skills-install-external --names graphify --approve</code>;
+активация профиля и offline-init не выполняют её автоматически.</p>
 <h3 id="skills-core">Минимальный общий набор: процесс и Ядро Go</h3>
 <table>
 <colgroup>
@@ -4422,6 +4463,11 @@ YAGNI, права, audit, isolation worktree и module владение зада
 короткими и ссылаться на существующие стандарты документа, чтобы не
 копировать всю архитектуру внутрь промптов.</p>
 <h1 id="doc-15">ADE: gpp и управление навыками ИИ</h1>
+<blockquote>
+<p><strong>v16:</strong> порядок разработки и условия переходов задаёт
+<a href="#doc-19">SDD-процесс</a>; документацию продукта — <a href="#doc-20">контракт артефактов</a>. Исторические рекомендации ниже
+применяются в этих границах.</p>
+</blockquote>
 <p><strong>В этом документе:</strong> <a href="#ade-bootstrap-v14">ADE —
 начальная настройка v14</a> · <a href="#ade-global-dirs">Глобальные
 каталоги</a> · <a href="#ade-global-install">Установка на новую
@@ -5189,6 +5235,11 @@ AI SDK). При различии приоритетов нормативным �
 монолит», «Встроенные возможности», «LOCAL-NATIVE разработка» и «Работа
 агентов и интеграция»; оригинальный v10 включен в ZIP архивом.</p>
 <h1 id="doc-17">Эталонный путь: план внедрения</h1>
+<blockquote>
+<p><strong>v16:</strong> порядок разработки и условия переходов задаёт
+<a href="#doc-19">SDD-процесс</a>; документацию продукта — <a href="#doc-20">контракт артефактов</a>. Исторические рекомендации ниже
+применяются в этих границах.</p>
+</blockquote>
 <p><strong>В этом документе:</strong> <a href="#roadmap">План реализации
 по этапам</a> · <a href="#repo-layout">Эталонная структура
 репозитория</a> · <a href="#golden-path-v11">Эталонный путь внедрения
@@ -5547,7 +5598,460 @@ Wire</a></td>
 </tr>
 </tbody>
 </table>
-</article><div class="footer-note">Go Product Platform · v15.0 · 20.11.2026 · Документация как код. Внешние ссылки ведут на первоисточники.</div></main><div class="right"><div class="right-note"><strong>Цель платформы</strong><p>Приоритет Go · Встроенные модули · Нативные рабочие деревья на Mac и фоновые E2E · Минимальное развёртывание через Compose.</p><p>Для изменения документа редактируй `platform/handbook/docs/`, затем собирай HTML: `python3 build.py`.</p><p><a href="#decision">К решению ↑</a></p></div></div></div><script>
+<h1 id="doc-19">SDD для AI-агентов: соло и команда 3–5 человек</h1>
+<h2 id="sdd-v17">Процесс как руководство</h2>
+<p>Платформа задаёт последовательный процесс, а не только каталог
+навыков. <strong>Одна фича — один владелец, одна спецификация и
+отдельное рабочее дерево Git.</strong> Фича проходит путь от
+пользовательского сценария через API/домен/данные до E2E. Человек
+определяет результат, пределы автономии и принимает риск; агент
+выполняет согласованную работу и предъявляет доказательства.</p>
+<p>С v17 этапы и условия готовности — это правила продукта
+(<code>docs/engineering/workflow.md</code>) и главы 19–20 руководства, а
+не исполняемые ворота CLI. Команды <code>sdd-*</code> и модуль
+<code>installer/sdd.py</code> удалены: артефакты — обычный Markdown с
+YAML frontmatter (глава 20), и агент правит их свободно, но честно.
+Дисциплину обеспечивают инструкции агенту, свежие проверки, независимое
+ревью и Git-история. Это осознанный обмен: меньше механики для поддержки
+— больше ответственности на людях и ревью. Если проекту нужен
+обязательный контроль, вводите его средствами CI и защищённой ветки.</p>
+<p>Три слоя не смешиваются:</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr>
+<th>Слой</th>
+<th>Содержание</th>
+<th>Где живёт</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Процесс</td>
+<td>SDD, планирование, TDD, ревью, работа с контекстом</td>
+<td>Глобальные навыки + правила продукта</td>
+</tr>
+<tr>
+<td>Технологии</td>
+<td>Go, Buf/Protobuf, Connect, PostgreSQL, React, Wails, Playwright</td>
+<td>Выбранные глобальные навыки</td>
+</tr>
+<tr>
+<td>Продукт</td>
+<td>HLD/LLD, ADR, контракты, SPEC, задачи, долг, инициативы</td>
+<td>Markdown с YAML frontmatter в Git продукта</td>
+</tr>
+</tbody>
+</table>
+<p>Upstream <code>addyosmani/agent-skills</code> не форкается и не
+переписывается. Расширенный каталог и профили включают инженерные навыки
+(в том числе <code>spec-driven-development</code> и
+<code>test-driven-development</code>), но <code>init</code> <strong>не
+устанавливает</strong> их. Активация профиля и глобальная установка
+остаются отдельными согласованными операциями. Существующий выбор
+навыков при миграции сохраняется.</p>
+<p><code>docs/engineering/workflow.md</code> адаптирует универсальный
+процесс: его порядок этапов и правила автономии имеют приоритет в
+продукте. Навыки загружаются по задаче; не следует загружать всю
+коллекцию. Это не разрешение обходить неудачные тесты, пользовательские
+ограничения или контроль высокого риска.</p>
+<h2 id="sdd-gates">Последовательные этапы и условия готовности</h2>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">TEXT</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="text codeblock"><code>specify → design → plan → implement → verify → review → ready → released
+    ↑          изменение утверждённых входов: новый цикл       |
+    └────────── требования/дизайн/план пересогласовываются ─────┘</code></pre></details>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr>
+<th>Текущий этап → следующий</th>
+<th>Условие готовности (проверяет человек/ревью, не CLI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>specify → design</td>
+<td>Цель, сценарии, границы, уникальные AC-ID и оценка влияния
+заполнены; SPEC принят</td>
+</tr>
+<tr>
+<td>design → plan</td>
+<td>Дизайн принят: решение, данные/контракты, риски и альтернативы</td>
+</tr>
+<tr>
+<td>plan → implement</td>
+<td>План и задачи приняты; уникальные T-ID, ациклические зависимости,
+ссылки на AC; зависимые фичи готовы</td>
+</tr>
+<tr>
+<td>implement → verify</td>
+<td>Все задачи закрыты; каждый срез прошёл модульную проверку</td>
+</tr>
+<tr>
+<td>verify → review</td>
+<td>Свежие unit + E2E и дополнительные проверки; каждый AC отражён в
+отчёте; затронутые документы заполнены</td>
+</tr>
+<tr>
+<td>review → ready</td>
+<td>Ревью другой сессии, вердикт pass, ноль блокеров; код и проектные
+документы зафиксированы в Git</td>
+</tr>
+<tr>
+<td>ready → released</td>
+<td>Явное решение человека и фактический выпуск во внешней системе</td>
+</tr>
+</tbody>
+</table>
+<p>Не перепрыгивайте этапы, не принимайте пустые шаблоны, не продолжайте
+после изменения согласованных требований/дизайна/плана/состава задач —
+начните новый цикл с пересогласования и заново пройденных проверок.</p>
+<p><code>status: "accepted"</code> у документа означает, что
+ответственная сторона проверила его содержание; это не автоматическое
+утверждение человеком. Для low/medium в согласованном объёме это может
+сделать агент. Для high нужен реальный человек. Инструкции не способны
+доказать, что текст осмыслен: ревью должно сопоставить требования,
+реализацию, тесты и документы.</p>
+<h2 id="sdd-autonomy">Риск, автономия и изменение объёма</h2>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr>
+<th>Класс</th>
+<th>Примеры</th>
+<th>Правило</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>low</td>
+<td>Обратимая локальная правка без смены контрактов</td>
+<td>Агент проходит этапы внутри запроса</td>
+</tr>
+<tr>
+<td>medium</td>
+<td>E2E-фича в существующих границах, совместимый API</td>
+<td>Агент готовит и проверяет SPEC/дизайн/план; человек доступен для
+существенной неоднозначности</td>
+</tr>
+<tr>
+<td>high</td>
+<td>Разрушительная миграция, смена модели доступа, границ доверия или
+архитектуры</td>
+<td>Человек принимает требования, дизайн и план до реализации</td>
+</tr>
+<tr>
+<td>выпуск</td>
+<td>Изменение рабочей среды</td>
+<td>Отдельное явное разрешение независимо от класса</td>
+</tr>
+</tbody>
+</table>
+<p>Для high решение о переходе к design, plan и implement принимает
+человек; ссылку на решение фиксируйте в PR/журнале фичи. Агент не
+выдумывает одобрения и не понижает класс риска ради темпа.</p>
+<p>Принятый объём не расширяется молча. Новая идея — раздел отложенного
+объёма, долг или новая спецификация. До поставки изменение согласованных
+входов означает новый цикл: перепишите затронутые документы, перечитайте
+проверки и пройдите этапы заново; прежние результаты храните в истории
+фичи. После выпуска создавайте delta-spec с новым ID и ссылкой
+<code>related</code> на исходную SPEC; актуальную архитектуру обновляйте
+по результату.</p>
+<p>Маленькая правка не требует длинного документа: обязательные разделы
+могут быть краткими. Для чисто документальных изменений выполняйте
+обычное ревью — не имитируйте E2E приложения там, где его нет.</p>
+<h2 id="sdd-example">Полный сценарий E2E-фичи</h2>
+<p>Пользователь: «Добавь назначение планограммы нескольким магазинам.
+Сделай API, домен, хранение и интерфейс. Проверь права, повтор команды и
+пользовательский путь». Агент сначала читает AGENTS, workflow,
+релевантные HLD/LLD/контракты, затем создаёт документы фичи:</p>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">SH</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="sh codeblock"><code>gpp init --project . --offline
+# docs/specifications/SPEC-assignments/:
+# requirements.md → design.md → plan.md → tasks.md</code></pre></details>
+<p>Заполнить <code>requirements.md</code>: сценарий пользователя,
+отрицательные сценарии, пределы объёма;
+<code>acceptance_ids: ["AC-01", "AC-02"]</code>; критерии должны быть в
+тексте. <code>affected_docs</code> перечисляет ID действительно
+затронутых документов. По умолчанию там HLD-product: перед первой фичей
+его нужно заполнить. Для локальной правки можно указать пустой список,
+но объяснить отсутствие влияния в SPEC и проверке. Затем
+<code>design.md</code> — решение и альтернативы (создать необходимые
+LLD/ADR/API/Data), <code>plan.md</code> — порядок вертикальных срезов,
+<code>tasks.md</code> — задачи.</p>
+<p>Задачи — вертикальные срезы: сначала назначение одному магазину с
+проверкой прав, затем массовое назначение с идемпотентностью и UI. Не
+разбивать фичу на отдельные независимые очереди «вся БД», «весь
+backend», «весь frontend».</p>
+<p>Пример метаданных и тела <code>tasks.md</code> (остальные общие поля
+сохраняются):</p>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">YAML</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="yaml codeblock"><code>task_ids: ["T-01", "T-02"]
+task_dependencies: ["T-02:T-01"]</code></pre></details>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">MARKDOWN</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="markdown codeblock"><code>## Задачи
+
+- [ ] T-01 Назначение одному магазину: AC-01; проверить go test ./internal/assignments/...
+- [ ] T-02 Массовое назначение и UI: AC-02; проверить pnpm exec playwright test assignments.spec.ts</code></pre></details>
+<p>Агент работает по зависимостям и после каждого среза запускает
+реальные проверки; команды отмечает в tasks/verification. Команды
+приложения — примеры; агент использует реальные команды продукта.</p>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">SH</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="sh codeblock"><code>go test ./internal/assignments/...
+pnpm exec playwright test assignments.spec.ts
+# При изменениях API — проверка контрактов:
+buf breaking --against '.git#branch=main'</code></pre></details>
+<p><strong>Финальные</strong> unit/E2E должны запускаться после фиксации
+исходников и документации в Git: свежий кандидат — это закоммиченное
+состояние, а не рабочее дерево с незаконченными правками. В
+verification.md для каждого AC записывается конкретный тест и результат;
+здесь же объясняется обновление затронутых документов.</p>
+<p>Ревьюер другой сессии читает SPEC, diff, результаты и затронутую
+архитектуру. В <code>review.md</code> записывает <code>reviewer</code>,
+разные <code>reviewer_session</code> и <code>implementer_session</code>,
+<code>verdict: "pass"</code>, <code>blockers: 0</code>; в теле — выводы,
+проверенные файлы и ограничения. Это должна быть реальная отдельная
+проверка, а не смена имени у того же исполнителя.</p>
+<p>Готовность и выпуск не выполняются командами платформы. Слияние —
+через обычный процесс PR/защищённой ветки. Выпуск — отдельный процесс с
+разрешением, подписанием, базовыми проверками, восстановлением и
+журналом поставки; этап released фиксирует фактическое решение человека
+и внешнее подтверждение, а не сам deploy.</p>
+<h2 id="sdd-evidence">Доказательства и свежесть</h2>
+<p>Проверка — это реально исполненная команда, а не утверждение об
+успехе. Успех — нулевой exit code на актуальном кандидате; ошибка,
+таймаут или сбой запуска — тоже результат, его не прячут. Для каждого
+вида проверки учитывается <strong>последняя</strong> запись, а не любая
+успешная.</p>
+<p>Хеш кандидата — состояние отслеживаемых и неигнорируемых новых
+файлов, удалений, исполняемого бита и подмодулей. Поэтому последующий
+коммит только с отчётами допустим, а смена исходников, дизайна,
+архитектуры или ребазирование требуют актуальных проверок. Сырые журналы
+лежат в игнорируемом каталоге; в Git — команда, результат и ссылка на
+журнал. Для передачи между машинами приложите журнал к PR/CI без
+секретов: сам Markdown не содержит полной трассировки теста.</p>
+<p>Инструкции не доказывают, что команда <code>true</code> тестирует
+приложение. Соответствие теста критерию и достаточность покрытия
+проверяет независимый рецензент; обязательный CI должен запускать
+доверенные команды продукта, а не принимать произвольный текст.</p>
+<h2 id="sdd-team">Соло, команда и интеграция</h2>
+<p><strong>Соло:</strong> человек — владелец продукта; основной агент
+реализует вертикальную фичу, другая сессия/модель проверяет её в
+отдельном контексте. Отсутствие коллеги не отменяет независимое ревью.
+Ревью можно выполнить последовательно, без постоянного запуска
+нескольких агентов и без лишней нагрузки на локальную машину.</p>
+<p><strong>Команда 3–5 человек:</strong> каждый человек отвечает за
+E2E-фичу и своих агентов. Общие API, миграции и межмодульные интерфейсы
+согласуются до параллельной реализации. <code>depends_on</code> в SPEC
+содержит ID предшествующих фич; до implement они должны быть
+ready/released. ID выбираются устойчивыми и уникальными, например
+SPEC-assignments-bulk, ADR-assignments-idempotency; числовые ID
+допустимы, но выделяются согласованно, а не одновременно несколькими
+агентами.</p>
+<p>Один пишущий агент на фичу/worktree. Процесс не является
+распределённой блокировкой и не поддерживает конкурентную запись одной
+фичи. БД, порты, файлы, скриншоты и процессы изолируются по рабочим
+деревьям. Сначала сливаются поставщики контрактов, затем потребители;
+финальный кандидат проверяется после интеграции. Старый зелёный отчёт до
+ребаза не считается доказательством нового кандидата.</p>
+<h2 id="sdd-enforcement">Граница контроля и миграция</h2>
+<p>С v17 в платформе нет машинного валидатора артефактов и ворот
+переходов. Контракт frontmatter — конвенция: соблюдайте её, чтобы
+документы разбирались простыми инструментами и ревью не тратило время на
+разнобой формата. Если проекту нужна обязательная проверка формата или
+готовности — добавьте собственные проверки в CI продукта (формат
+frontmatter, уникальность ID, существование ссылок, реальные тесты) и
+включите их как required checks защищённой ветки. Файлы и локальный
+Python доступны пользователю: никакой локальный инструмент не защищает
+от намеренной подделки, а запрет прямого push задаёт Git-хостинг. GPP не
+заявляет обратного.</p>
+<p><code>gpp migrate --project .</code> поддерживает v13/v14/v15/v16 →
+v17. Инициализация добавляет только отсутствующие
+<code>docs/engineering/workflow.md</code> и HLD; существующие документы,
+AGENTS вне управляемого блока и выбор навыков сохраняются. Устаревший
+<code>tools/sdd.py</code> удаляется, а оставшиеся от v16
+<code>state.md</code>, <code>gates/</code>, <code>evidence/</code>,
+<code>history/</code> сохраняются как история проекта. Старые проектные
+инструкции нужно согласовать с v17; автоматически переписывать их
+нельзя. Если у продукта уже есть система спецификаций, согласуйте
+перенос/соответствие форматов; v17 не конвертирует OpenSpec или чужой
+YAML.</p>
+<h1 id="doc-20">Контракт инженерных артефактов</h1>
+<h2 id="artifact-layout">Место документации и минимальная основа</h2>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">TEXT</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="text codeblock"><code>product/
+  docs/
+    engineering/workflow.md       # правила и полномочия агента
+    architecture/hld/overview.md  # минимальный HLD; при init — честный draft
+    architecture/lld/             # устройство конкретных модулей
+    architecture/decisions/       # один реестр уникальных ADR-ID
+    contracts/api/                # семантика .proto, права, ошибки, совместимость
+    contracts/data/               # владение, ограничения, миграции
+    contracts/events/             # доставка, порядок, повторы
+    specifications/SPEC-feature/
+      requirements.md             # требования, AC-ID, границы, влияние
+      design.md                   # решение и альтернативы
+      plan.md                     # порядок вертикальных срезов
+      tasks.md                    # T-ID, зависимости, проверки, выполнение
+      verification.md             # AC → тест → результат; документация
+      review.md                   # независимые выводы и блокеры
+    debt/                         # подтверждённый технический долг
+    initiatives/                  # группы связанных улучшений
+  .go-product-platform/           # игнорируемые материалы и сырые журналы</code></pre></details>
+<p>Продуктовые репозитории обязаны использовать эту структуру и workflow
+из главы 19. Обоснованные адаптации фиксируются в
+<code>docs/engineering/workflow.md</code> продукта. При подключении
+app-canvas его <code>design/</code> дополняет эту структуру;
+дизайн-спецификации ссылаются на инженерные SPEC, а не создают второй
+список задач.</p>
+<p>Все документы продукта входят в Git. Init создаёт только workflow и
+HLD; остальные архитектурные документы — по необходимости. Набор фичи —
+шесть документов из таблицы выше. Это шаблоны, не доказательство
+выполненной работы. HLD — единая логическая модель продукта; его можно
+разделить на контекст, контейнеры, развёртывание и NFR. LLD — отдельно
+по реальным модулям. В проектах, мигрировавших с v16, могут оставаться
+<code>state.md</code>, <code>gates/</code>, <code>evidence/</code> и
+<code>history/</code> — это история циклов; новые фичи такие файлы не
+создают.</p>
+<h2 id="artifact-frontmatter">YAML frontmatter v1</h2>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">YAML</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="yaml codeblock"><code>---
+id: "ADR-assignments-idempotency"
+kind: "adr"
+status: "accepted"
+owner: "oleg"
+related: ["SPEC-assignments", "HLD-product"]
+level: "lld"
+module: "assignments"
+supersedes: "ADR-assignments-original"
+---</code></pre></details>
+<p>ID уникален во всех активных артефактах проекта. Не переименовывайте
+его при смене заголовка. <code>related</code> содержит существующие ID,
+<code>depends_on</code> — направленные зависимости без циклов,
+<code>supersedes</code> — ID прежнего решения. Уберите supersedes, если
+замещения нет.</p>
+<p>Поля <code>id</code>, <code>kind</code>, <code>status</code>,
+<code>owner</code>, <code>related</code> обязательны. Разрешены
+дополнительные плоские поля. Поддерживается <strong>ограниченный YAML
+1.2</strong>: ключи в snake_case, строки в двойных кавычках, числа,
+true/false/null, однострочные списки строк. Значения должны быть
+JSON-совместимы. Вложенные mappings, блочные строки, YAML aliases,
+некавыченные даты и многострочные списки не используются: держите
+frontmatter в этом подмножестве, чтобы документы разбирались простыми
+инструментами и оставались читаемыми. Сложное содержание размещается в
+Markdown.</p>
+<p>Типы: policy, hld, lld, adr, api, data, event, debt, initiative,
+spec, design, plan, tasks, verification, review. Draft допустим при
+создании; рабочий документ — accepted, implemented или verified, без
+TODO/TBD/FIXME в принятых разделах. Служебные типы state/gate/evidence
+встречаются только в проектах, мигрировавших с v16; этап процесса теперь
+описывается в документах фичи, а не отдельным state-файлом.</p>
+<p>Следите за целостностью Markdown-ссылок на локальные файлы и
+ID-связей на ревью; HTTP-ссылки не проверяются автоматически. Чужие
+документы в этих каталогах должны быть приведены к контракту; иные
+каталоги документации не берутся под управление автоматически.
+Исторические циклы исключены из требования уникальности активных ID.</p>
+<h2 id="artifact-impact">Когда создавать и обновлять артефакт</h2>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr>
+<th>Вид</th>
+<th>Содержание</th>
+<th>Триггер</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HLD</td>
+<td>Контекст, компоненты, развёртывание, NFR</td>
+<td>Изменение границ продукта, платформы, доверия, размещения</td>
+</tr>
+<tr>
+<td>LLD</td>
+<td>Ответственность, интерфейсы, состояния и транзакции</td>
+<td>Изменение внутреннего устройства модуля</td>
+</tr>
+<tr>
+<td>ADR</td>
+<td>Контекст, решение, альтернативы, последствия</td>
+<td>Долгосрочный выбор с существенными компромиссами</td>
+</tr>
+<tr>
+<td>API</td>
+<td>Первоисточник, семантика, совместимость и авторизация</td>
+<td>Изменение внешнего/межмодульного контракта</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Первоисточник, владение и ограничения, миграции</td>
+<td>Изменение модели данных или её жизненного цикла</td>
+</tr>
+<tr>
+<td>Event</td>
+<td>Первоисточник, доставка/порядок, повторы</td>
+<td>Новые события, иной порядок или гарантия доставки</td>
+</tr>
+<tr>
+<td>Debt</td>
+<td>Наблюдение и доказательства, последствия, варианты решения</td>
+<td>Подтверждённая проблема, которую не устраняют сейчас</td>
+</tr>
+<tr>
+<td>Initiative</td>
+<td>Цель/эффект, объём, порядок реализации</td>
+<td>Несколько связанных изменений с общей целью</td>
+</tr>
+</tbody>
+</table>
+<p>Создавайте артефакт как файл в соответствующем каталоге с frontmatter
+и разделами из таблицы выше; ID уникален в активных артефактах
+проекта.</p>
+<details class="code-accordion"><summary><span class="code-title">Показать пример кода</span><span class="code-lang">SH</span></summary><button aria-label="Копировать код" class="copy-code" type="button">Копировать</button><pre class="sh codeblock"><code>docs/architecture/lld/LLD-assignments.md
+docs/architecture/decisions/ADR-assignments-idempotency.md
+docs/debt/DEBT-legacy-retries.md</code></pre></details>
+<p>Принятый ADR — история решения. Изменение решения создаёт новый ADR с
+supersedes; не переписывайте прежнее обоснование. HLD/LLD описывают
+текущее подтверждённое состояние; целевые изменения помечаются явно.
+Существование supersedes и неизменность истории ADR проверяются по diff
+на ревью.</p>
+<p>Protobuf — первоисточник API, миграции и схема — первоисточник
+данных. Markdown хранит смысл, ограничения и решения, не дублирует все
+поля схемы. Для каждой фичи в SPEC перечисляются affected_docs;
+verification объясняет, что обновлено и почему. Изменение одного
+обработчика не должно переписывать весь HLD.</p>
+<h2 id="artifact-debt">Долг, инициативы и единый список задач</h2>
+<p>Наблюдение → доказательство → DEBT → при необходимости INIT → SPEC →
+задачи → реализация → проверки → закрытие долга. Маленький долг может
+сразу получить одну SPEC; не каждому DEBT нужна инициатива. Недоказанный
+риск — исследование, а не подтверждённый дефект. Принятый риск требует
+ответственного, причины и условия повторного рассмотрения; закрытие
+долга — ссылки на реализацию и доказательство.</p>
+<p>По умолчанию tasks.md — единственный список исполнения. Ссылки на
+Linear/Plane/ GitLab допустимы в теле или метаданных, но платформа не
+синхронизирует внешние статусы. Если позже выбирается внешний источник
+задач, потребуется отдельный адаптер и явное изменение контракта; нельзя
+одновременно считать оба списка авторитетными.</p>
+<h2 id="artifact-validation">Два уровня проверки</h2>
+<p><strong>Конвенциональный (по желанию проекта):</strong> синтаксис
+frontmatter, обязательные поля, уникальные ID, существование ссылок,
+ацикличность зависимостей. В дистрибутиве нет валидатора; при
+необходимости добавьте собственную проверку в CI продукта как required
+check. Проверка формата не означает приёмку фичи.</p>
+<p><strong>Смысловой (обязательный):</strong> соответствие HLD/LLD коду,
+достаточность AC и тестов, корректность прав/транзакций, достоверность
+долга, отсутствие противоречащих ADR, независимость ревью. Рецензент
+указывает конкретные файлы и выводы; LLM не является доказательством
+безошибочности.</p>
+</article><div class="footer-note">Go Product Platform · v17.0 · 21.11.2026 · Документация как код. Внешние ссылки ведут на первоисточники.</div></main><div class="right"><div class="right-note"><strong>Цель платформы</strong><p>Приоритет Go · Встроенные модули · Нативные рабочие деревья на Mac и фоновые E2E · Минимальное развёртывание через Compose.</p><p>Для изменения документа редактируй `platform/handbook/docs/`, затем собирай HTML: `python3 build.py` — результат: `platform/docs/index.html`.</p><p><a href="#decision">К решению ↑</a></p></div></div></div><script>
 const root=document.documentElement,sidebar=document.getElementById('sidebar');
 document.getElementById('theme').onclick=()=>{const d=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=d;document.getElementById('theme').textContent=d==='dark'?'☀ Светлая':'◐ Тёмная'};
 document.getElementById('menu').onclick=()=>sidebar.classList.toggle('open');

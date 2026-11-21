@@ -2,8 +2,8 @@
 title: "LOCAL-NATIVE разработка"
 description: "Разработка без Docker: нативные процессы Go + Vite + PostgreSQL, Git worktree как отдельное окружение, управляющий CLI devctl, mise, фоновые E2E и измеряемые бюджеты скорости."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 10
 source: "handbook.md §11, §38, §39"
 tags: [local-native, worktree, devctl, mise, vite, postgresql, e2e, playwright, watchexec, fast-loop]

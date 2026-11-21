@@ -2,8 +2,8 @@
 title: "Vercel AI SDK поверх ядра Go"
 description: "Vercel AI SDK как необязательная среда выполнения агентов на TypeScript: выбор действий агентом, исполнение команд через Go Connect API, безопасность агентов и границы полномочий."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 12
 source: "handbook.md §16"
 tags: [ai-sdk, vercel, agent-runtime, llm, security, tools]

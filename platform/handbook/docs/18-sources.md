@@ -2,14 +2,14 @@
 title: "Первоисточники и проверка утверждений"
 description: "Ссылки на первоисточники решений handbook: PostgreSQL, Wails, Connect, Buf, worktrees, mise, sync-провайдеры, security-сервисы, тестирование, UI, AI SDK и источники решений v11."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 18
 source: "handbook.md §23, §46"
 tags: [sources, references, verification]
 up: README.md
 prev: 17-roadmap.md
-next: null
+next: 19-agent-sdd.md
 ---
 
 # Первоисточники и проверка утверждений
@@ -67,4 +67,4 @@ next: null
 
 ---
 
-Навигация: [← 17. Эталонный путь](17-roadmap.md) · [Оглавление](README.md)
+Навигация: [← 17. Эталонный путь](17-roadmap.md) · [Оглавление](README.md) · [19. SDD →](19-agent-sdd.md)

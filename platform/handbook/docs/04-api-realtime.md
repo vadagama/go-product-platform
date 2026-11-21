@@ -2,8 +2,8 @@
 title: "API, контракты и realtime"
 description: "Protobuf + Buf + Connect/gRPC как единый контракт, правила эволюции схем, Buf как quality gate, события и ревизии для collaboration, realtime без отдельного брокера сообщений."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 4
 source: "handbook.md §4, §5, §37"
 tags: [protobuf, buf, connect, grpc, api, realtime, websocket, collaboration, outbox]

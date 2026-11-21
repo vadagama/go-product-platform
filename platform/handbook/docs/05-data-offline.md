@@ -2,8 +2,8 @@
 title: "Данные и приоритет офлайн-работы"
 description: "Разные роли баз данных (PostgreSQL, SQLite), версии PostgreSQL 18.7 и 19.0, драйверы и миграции, offline-first путь чтения и путь записи, Electric и PowerSync."
 handbook: "Go Product Platform — руководство по архитектуре и разработке с ИИ"
-version: "15.0"
-updated: "2026-11-20"
+version: "16.0"
+updated: "2026-11-21"
 order: 5
 source: "handbook.md §6, §7"
 tags: [postgresql, sqlite, databases, offline-first, sync, electric, powersync, migrations]
