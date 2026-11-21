@@ -395,7 +395,7 @@ def write_bridge(project: Path) -> None:
 - Для управления набором читайте `.agents/skills/go-project-platform-manager/SKILL.md`. Перед установкой или обновлением покажите структурированный список навыков, источников, версий, агентов и референсов для согласования. Глобальное обновление не обновляет проектные копии.
 - Если проектные материалы отсутствуют, завершите согласованную установку; не подменяйте их молча глобальными версиями. `gpp init --offline` восстанавливает только локальную документацию платформы.
 """
-    for name in ('AGENT.md', 'AGENTS.md', 'CLAUDE.md'):
+    for name in ('AGENTS.md', 'CLAUDE.md'):
         ensure_block(project / name, bridge)
     write_manual(project)
 

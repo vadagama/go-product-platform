@@ -81,7 +81,7 @@ class BootstrapTests(unittest.TestCase):
         self.call('init', '--project', str(self.project), '--offline')
         self.call('doctor', '--project', str(self.project), '--strict')
         self.assertIn('Ручные команды запуска', manual.read_text())
-        for name in ('AGENT.md', 'AGENTS.md', 'CLAUDE.md'):
+        for name in ('AGENTS.md', 'CLAUDE.md'):
             self.assertIn('имеют приоритет', (self.project / name).read_text())
             self.assertIn('Обязательно соблюдайте флоу', (self.project / name).read_text())
 
@@ -112,6 +112,7 @@ class BootstrapTests(unittest.TestCase):
 
     def test_project_init_never_installs_shared_skills(self):
         self.call('init','--project',str(self.project),'--offline')
+        self.assertFalse((self.project / 'AGENT.md').exists())
         self.assertTrue((self.project/'.go-product-platform/docs/index.html').is_file())
         self.assertFalse((self.project/'.agents/skills').exists())
         self.assertFalse((self.project/'.claude/skills').exists())
@@ -168,7 +169,6 @@ class BootstrapTests(unittest.TestCase):
         self.call('init', '--project', str(self.project), '--offline')
         expected = {
             'AGENTS.md': 'software-development-workflow',
-            'AGENT.md': 'software-development-workflow',
             'CLAUDE.md': 'software-development-workflow',
         }
         generated = {}

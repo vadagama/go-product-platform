@@ -163,7 +163,7 @@ gpp doctor --project /path/to/product --ready
   .agents/go-product-platform/    # глобальные исходники и зафиксированный lock ревизий
 
 my-product/
-  AGENT.md, AGENTS.md, CLAUDE.md, MANUAL.md, orca.yaml, .gitignore
+  AGENTS.md, CLAUDE.md, MANUAL.md, orca.yaml, .gitignore
   .agents/{skills,agents,references}/  # проектные материалы в Git
   .claude/{skills,agents,references}/  # те же материалы для Claude
   go-product-platform.lock.json  # выбор навыков, источники и контрольные суммы, в Git
@@ -189,7 +189,7 @@ my-product/
 Полная настройка `init --setup-plan ... --approve` делает это автоматически.
 `init --offline` по-прежнему не скачивает навыки и не считается полной настройкой.
 
-В `AGENT.md`, `AGENTS.md` и `CLAUDE.md` на русском явно обязателен флоу
+В `AGENTS.md` и `CLAUDE.md` на русском явно обязателен флоу
 software-development-workflow. Сам стандарт с шаблонами устанавливается из
 зафиксированной версии репозитория, указанной в манифесте. `MANUAL.md` содержит
 инструкцию настройки и команды согласованного setup-плана; агент дополняет её

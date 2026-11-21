@@ -118,7 +118,7 @@ JSON и CLI готовит и выполняет агент. `gpp wizard` в э�
 
 ## Стандарт и дополнительные компоненты
 
-- В `AGENT.md`, `AGENTS.md` и `CLAUDE.md` явно на русском требуйте соблюдать флоу
+- В `AGENTS.md` и `CLAUDE.md` явно на русском требуйте соблюдать флоу
   разработки из software-development-workflow и приоритет проектных skills.
 - Каждый продукт использует `docs/engineering/workflow.md` и структуру handbook
   19–20. Инварианты — `runtime/platform/constitution.md` относительно скилла.

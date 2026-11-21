@@ -81,6 +81,6 @@ gpp skills-update-external --names orca-cli,graphify --approve
 При полной настройке после согласования списка `skills-project --json` установите
 навыки, агентов и референсы в `.agents/` и `.claude/` продукта (`skills-project --approve`;
 `init --setup-plan --approve` выполняет этот шаг автоматически). Эти копии и lock
-хранятся в Git и имеют приоритет над глобальными. Корневые AGENT.md, AGENTS.md
+хранятся в Git и имеют приоритет над глобальными. Корневые AGENTS.md
 и CLAUDE.md требуют на русском соблюдать software-development-workflow.
 MANUAL.md содержит настройку, окружение, запуск и проверки конкретного продукта.
