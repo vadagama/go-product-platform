@@ -1,3 +1,4 @@
 interface:
-  display_name: Go Platform Bootstrap
-  short_description: Инициализация Go-first проектов в Orca ADE
+  display_name: "Go Platform Bootstrap"
+  short_description: "Настройка Go-продукта через опросник в чате"
+  default_prompt: "$go-platform-bootstrap Подготовь этот проект к разработке"
