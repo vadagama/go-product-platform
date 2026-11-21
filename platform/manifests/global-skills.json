@@ -1,6 +1,6 @@
 {
   "manifest_version": "17.0.0",
-  "policy": "Install once in ~/.agents/skills and ~/.claude/skills. No shared skill is installed into projects.",
+  "policy": "Product setup installs approved portable assets in .agents and .claude; global bootstrap remains available.",
   "sources": [
     {
       "key": "addyosmani",
@@ -19,9 +19,22 @@
         "debugging-and-error-recovery": "skills/debugging-and-error-recovery",
         "git-workflow-and-versioning": "skills/git-workflow-and-versioning",
         "constraint-driven-development": "skills/constraint-driven-development",
-        "documentation-and-adrs": "skills/documentation-and-adrs"
+        "documentation-and-adrs": "skills/documentation-and-adrs",
+        "using-agent-skills": "skills/using-agent-skills",
+        "interview-me": "skills/interview-me",
+        "idea-refine": "skills/idea-refine",
+        "doubt-driven-development": "skills/doubt-driven-development",
+        "frontend-ui-engineering": "skills/frontend-ui-engineering",
+        "browser-testing-with-devtools": "skills/browser-testing-with-devtools",
+        "performance-optimization": "skills/performance-optimization",
+        "accessibility-engineering": "skills/accessibility-engineering",
+        "ci-cd-and-automation": "skills/ci-cd-and-automation",
+        "deprecation-and-migration": "skills/deprecation-and-migration",
+        "observability-and-instrumentation": "skills/observability-and-instrumentation",
+        "shipping-and-launch": "skills/shipping-and-launch"
       },
-      "references": "references"
+      "references": "references",
+      "revision": "8c99fa36d90068c82d547f7c12a9d67a3e95f4ee"
     },
     {
       "key": "superpowers",
@@ -158,5 +171,16 @@
         "openbao-general": ".claude/skills/openbao-general"
       }
     }
-  ]
+  ],
+  "workflow": {
+    "key": "software-development-workflow",
+    "repo": "https://github.com/vadagama/software-development-workflow.git",
+    "revision": "95ad10f0e20b592a85b27c96c123ec3613956feb",
+    "skills": {},
+    "references": "docs",
+    "resources": [
+      "templates",
+      "examples"
+    ]
+  }
 }

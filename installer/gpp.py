@@ -19,6 +19,8 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+import project_assets
+
 from readiness import CONTRACT, check_ready, execute, setup_plan, validate_plan
 
 VERSION = '17.0.0'
@@ -111,11 +113,14 @@ def load_manifest(path: Path) -> dict:
     if not isinstance(data.get('sources'), list):
         raise RuntimeError(f'Invalid global skills manifest: {path}')
     seen = set()
-    for source in data['sources']:
+    for source in data['sources'] + ([data['workflow']] if data.get('workflow') else []):
         key = source['key']
         if '/' in key or key.startswith('.') or key in seen:
             raise RuntimeError(f'Unsafe or duplicate source key: {key}')
         seen.add(key)
+        for subpath in [source.get('references'), source.get('agents'), *source.get('resources', [])]:
+            if subpath and (Path(subpath).is_absolute() or '..' in Path(subpath).parts):
+                raise RuntimeError(f'Unsafe resource path: {subpath}')
         for name, subpath in source['skills'].items():
             parts = Path(subpath).parts
             if not name or '/' in name or name.startswith('.') or '..' in parts or Path(subpath).is_absolute():
@@ -162,7 +167,7 @@ def link_refs(source: Path) -> None:
 def cache_source(source: dict, *, offline: bool = False, refresh: bool = False) -> tuple[Path, str]:
     key = source['key']
     previous = json_load(GLOBAL_LOCK).get('repositories', {}).get(key, {})
-    pinned = previous.get('commit')
+    pinned = source.get('revision') or previous.get('commit')
     if pinned and not refresh:
         snapshot = GLOBAL_PLATFORM / 'vendor' / key / pinned
         if snapshot.is_dir():
@@ -176,7 +181,12 @@ def cache_source(source: dict, *, offline: bool = False, refresh: bool = False) 
         cache.parent.mkdir(parents=True, exist_ok=True)
         # Sparse shallow clone avoids downloading whole frontend/Android monorepos.
         run(['git', 'clone', '--depth', '1', '--filter=blob:none', '--sparse', source['repo'], str(cache)])
-        selected = list(source['skills'].values())
+        if source.get('revision'):
+            run(['git', '-C', str(cache), 'fetch', '--depth', '1', 'origin', source['revision']])
+            run(['git', '-C', str(cache), 'checkout', '--detach', 'FETCH_HEAD'])
+        selected = list(source['skills'].values()) + source.get('resources', [])
+        if source.get('agents'):
+            selected.append(source['agents'])
         if source.get('references'):
             selected.append(source['references'])
         # Git cone sparse checkout accepts directories; retain shared resources.
@@ -357,7 +367,7 @@ def setup_global(args) -> None:
 def copy_platform(project: Path) -> Path:
     target = project / '.go-product-platform'
     target.mkdir(exist_ok=True)
-    # Explicit exclusion: shared skills/vendor MUST NEVER be copied into project.
+    # Offline scaffold excludes skills; approved setup installs them separately.
     shutil.copytree(HERE / 'platform', target, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns('skills', 'vendor', '__pycache__'))
     (target / 'graphify/out').mkdir(parents=True, exist_ok=True)
@@ -368,6 +378,7 @@ def copy_platform(project: Path) -> Path:
     (target / 'tools').mkdir(exist_ok=True)
     shutil.copy2(Path(__file__).resolve(), target / 'tools/gpp.py')
     shutil.copy2(Path(__file__).resolve().with_name('readiness.py'), target / 'tools/readiness.py')
+    shutil.copy2(Path(__file__).resolve().with_name('project_assets.py'), target / 'tools/project_assets.py')
     alias = project / 'graphify-out'
     if not alias.exists() and not alias.is_symlink():
         alias.symlink_to('.go-product-platform/graphify/out', target_is_directory=True)
@@ -375,24 +386,48 @@ def copy_platform(project: Path) -> Path:
 
 
 def write_bridge(project: Path) -> None:
-    bridge = '''## Go Product Platform (generated bridge)
-- Shared AI skills are installed once **globally**: `~/.agents/skills/` for Codex/Zed, `~/.claude/skills/` for Claude. Never vendor global skills into this repository.
-- Read `.go-product-platform/README.md` and relevant Handbook sections when needed; this ignored directory contains **documentation and local graph data**, not shared skills.
-- For setup, skills selection, installation status and update requests, read `.go-product-platform/project-skills/go-project-platform-manager/SKILL.md`; **ask for confirmation in chat** before changes.
-- Only use active globally installed skills listed in `.go-product-platform/active-global-skills.md`; never install common skills into this project.
-- To restore it in an Orca worktree, run `gpp init --project . --offline` (no global installs, no network).
-- Do not create any project-specific skill unless the current product requires it; such skills must be explicitly designed from project context.
-- For EVERY product change read `docs/engineering/workflow.md` first. Create/select `docs/specifications/<SPEC-ID>/requirements.md`; follow spec → design → plan → tasks before implementing, and keep specs updated when decisions change.
-- Product repositories MUST use the documentation structure and workflow from Go Product Platform Handbook chapters 19–20; record justified adaptations in `docs/engineering/workflow.md`.
-- Track product HLD/LLD/ADR/contracts/specs/debt in Git under `docs/`, never only in the ignored platform directory. Update affected docs with code.
-- Verify with fresh real test runs before declaring done; use an independent review session before merge. Never invent approvals, test results or reviewer identity.
-- High-risk work and releases require an actual human decision; authorized low/medium-risk steps proceed automatically per project workflow.
-- Use Go-first modular monolith, LOCAL-NATIVE PostgreSQL, isolated worktrees, affected tests and one final verified integration gate.
-- Check `go-product-platform.lock.json` for platform version. For global source SHAs see `~/.agents/go-product-platform/global-skills.lock.json`.
-- Never commit local platform caches, graph results or credentials; never introduce new external services without evidence.
-'''
-    ensure_block(project / 'AGENTS.md', bridge)
-    ensure_block(project / 'CLAUDE.md', 'Read `AGENTS.md` for Go Product Platform rules. Shared skills are installed in `~/.claude/skills/`; use relevant ones only. Do not copy global skills into the project.')
+    bridge = """## Go Product Platform — правила агентной работы
+- Обязательно соблюдайте флоу разработки из **software-development-workflow**. Перед изменением прочитайте `.agents/references/software-development-workflow/docs/workflow.md`, карту `docs/upstream.md` рядом с ним и `docs/engineering/workflow.md` продукта.
+- Используйте проектные навыки из `.agents/skills/` (Codex) и `.claude/skills/` (Claude), роли из `agents/` и материалы из `references/` этих каталогов. Эти версии имеют приоритет над одноимёнными глобальными навыками. Применяйте навыки по характеру задачи; не отменяйте обязательные проверки процесса.
+- Порядок работы: контекст → уточнение требований → проектирование → планирование → реализация → проверка → независимое ревью → выпуск → развитие. Выполняйте применимые согласования и проверки software-development-workflow.
+- Храните требования, HLD/LLD/ADR, контракты и доказательства проверок в Git продукта; обновляйте затронутую документацию вместе с кодом. Не выдумывайте результаты или согласования.
+- Настройка и запуск описаны в `MANUAL.md`. Состав и происхождение проектного набора зафиксированы в `go-product-platform.lock.json`.
+- Для управления набором читайте `.agents/skills/go-project-platform-manager/SKILL.md`. Перед установкой или обновлением покажите структурированный список навыков, источников, версий, агентов и референсов для согласования. Глобальное обновление не обновляет проектные копии.
+- Если проектные материалы отсутствуют, завершите согласованную установку; не подменяйте их молча глобальными версиями. `gpp init --offline` восстанавливает только локальную документацию платформы.
+"""
+    for name in ('AGENT.md', 'AGENTS.md', 'CLAUDE.md'):
+        ensure_block(project / name, bridge)
+    write_manual(project)
+
+
+def write_manual(project: Path) -> None:
+    plan = json_load(project / CONTRACT)
+    lines = ["# Настройка проекта", "", "## Первоначальная подготовка",
+             "Откройте этот репозиторий в Codex/Claude и вызовите go-platform-bootstrap. "
+             "Выберите стек, согласуйте таблицу проектных навыков, агентов, референсов и команды установки.",
+             "", "## Агентные материалы",
+             "В Git хранятся .agents/ и .claude/: skills, agents, references. "
+             "Приоритет имеют проектные версии. Обязательно соблюдайте флоу software-development-workflow "
+             "из .agents/references/software-development-workflow/docs/workflow.md.",
+             "", "## Восстановление и проверка", "```sh", "gpp init --project . --offline",
+             "gpp doctor --project . --ready", "```",
+             "Проверка ready выполняет команды из согласованного go-product-platform.setup.json.",
+             "", "## Окружение и установка",
+             "Секреты задавайте через окружение; не добавляйте их в Git или команды плана."]
+    for command in plan.get('setup', []):
+        lines.append('- Каталог `' + command.get('cwd', '.') + '`: `' + shlex.join(command['argv']) + '`')
+    for component in plan.get('components', []):
+        lines.append('### ' + component['name'])
+        lines.append('Файлы: ' + ', '.join('`' + x + '`' for x in component['paths']))
+        for command in component['checks']:
+            lines.append('- Проверка из `' + command.get('cwd', '.') + '`: `' + shlex.join(command['argv']) + '`')
+    lines += ['', '## Обновление навыков',
+              'Сформируйте `gpp skills-project --project . --json`, согласуйте список, затем '
+              'выполните `gpp skills-project --project . --approve`. Изменённые вручную материалы сохраняются: '
+              'при конфликте установщик остановится. Закоммитьте оба каталога и lock-файл.',
+              'Инструкции запуска приложений, настройки БД и имена переменных окружения дополняйте '
+              'по фактическому стеку вне блока GPP; не указывайте непроверенные команды.']
+    ensure_block(project / 'MANUAL.md', '\n'.join(lines))
 
 
 def orca_config(project: Path) -> None:
@@ -418,8 +453,8 @@ def lock_project(project: Path) -> None:
         raise RuntimeError('Project pins different platform version. Run `gpp migrate --project .` to v17.')
     current.update({
         'platform_version': VERSION,
-        'skills_scope': 'user-global',
-        'skills_locations': ['~/.agents/skills', '~/.claude/skills'],
+        'skills_scope': 'project-local',
+        'skills_locations': ['.agents/skills', '.claude/skills'],
         'global_skills_manifest_version': VERSION,
     })
     current.pop('addyosmani_commit', None)
@@ -517,12 +552,15 @@ def init(args) -> None:
             raise RuntimeError('Choose --setup or --setup-plan, not both')
         if not args.profile:
             raise RuntimeError('--setup requires --profile')
-        print(json.dumps(setup_plan(args.profile), ensure_ascii=False, indent=2))
+        plan = setup_plan(args.profile)
+        plan['skills'] = [n.strip() for n in getattr(args, 'names', '').split(',') if n.strip()]
+        plan['agent_assets'] = project_asset_plan([*PROFILE_DEFAULTS[args.profile], *plan['skills']], load_manifest(manifest_path(args)))
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
         return
     if getattr(args, 'setup_plan', None):
         apply_setup(args)
         return
-    if getattr(args, 'profile', None) or getattr(args, 'json', False):
+    if getattr(args, 'profile', None) or getattr(args, 'json', False) or getattr(args, 'names', ''):
         raise RuntimeError('--profile/--json require --setup')
     project = Path(args.project).expanduser().resolve()
     assert_git(project)
@@ -539,11 +577,11 @@ def init(args) -> None:
     save_json(target / 'install-manifest.json', {
         'platform_version': VERSION,
         'installed_at': datetime.now(timezone.utc).isoformat(),
-        'skills_scope': 'global-only',
+        'skills_scope': 'project-local',
         'project_specific_skills': 'not installed by default',
         'global_dirs': [str(AGENT_ROOT / 'skills'), str(CLAUDE_ROOT / 'skills')],
     })
-    say(f'Project initialized: {project} (v{VERSION}); local project manager ready; no shared skills copied.')
+    say(f'Project initialized: {project} (v{VERSION}); local project manager ready; agent instructions and MANUAL ready; run approved setup to install project assets.')
     if not (AGENT_ROOT / 'skills/go-platform-bootstrap/SKILL.md').is_file():
         say('Global skills not yet installed; run once: gpp setup-global --skills --graphify --orca')
 
@@ -602,7 +640,7 @@ def migrate(args) -> None:
         generated |= {'/.agents/references', '/.claude/references'}
         ignore.write_text('\n'.join(line for line in old if line not in generated) + '\n', encoding='utf-8')
     save_json(project / 'go-product-platform.lock.json', {
-        'platform_version': VERSION, 'skills_scope': 'user-global',
+        'platform_version': VERSION, 'skills_scope': 'project-local',
         'skills_locations': ['~/.agents/skills','~/.claude/skills'],
         'global_skills_manifest_version': VERSION,
         'migration_from': '13.0.0',
@@ -660,6 +698,8 @@ def apply_setup(args) -> None:
     unknown = set(names) - set(curated) - set(ORCA_SKILLS) - {'graphify', 'go-platform-bootstrap'}
     if unknown:
         raise RuntimeError('Unknown setup skills: ' + ', '.join(sorted(unknown)))
+    if plan.get('agent_assets') != project_asset_plan(names, manifest):
+        raise RuntimeError('Review and include the current structured agent_assets list before setup')
     # Check version before executing any project commands or touching global state.
     current = json_load(project / 'go-product-platform.lock.json')
     if current and current.get('platform_version') != VERSION:
@@ -675,7 +715,9 @@ def apply_setup(args) -> None:
     external = sorted(set(missing) & (set(ORCA_SKILLS) | {'graphify'}))
     if external:
         install_external_selected(argparse.Namespace(names=','.join(external), approve=True))
+    install_project_assets(project, manifest)
     save_json(project / CONTRACT, plan)
+    write_manual(project)
     doctor(argparse.Namespace(project=str(project), manifest=args.manifest, strict=True, ready=True))
 
 
@@ -691,7 +733,7 @@ def doctor(args) -> None:
         'gitignore platform path': '/.go-product-platform/' in (project / '.gitignore').read_text('utf-8') if (project / '.gitignore').exists() else False,
         'project bridge': (project / 'AGENTS.md').is_file() and (project / 'CLAUDE.md').is_file(),
         'Orca setup': (project / 'orca.yaml').is_file() and 'gpp init' in (project / 'orca.yaml').read_text('utf-8'),
-        'global scope lock': main.get('skills_scope') == 'user-global',
+        'project scope lock': main.get('skills_scope') == 'project-local',
         'no v13 project vendor': not (project / '.go-product-platform/vendor/addyosmani-agent-skills').exists(),
         'no default project global links': all(not (project / x / 'skills' / n).is_symlink()
                                               for x in ('.agents','.claude') for n in OLD_SKILLS),
@@ -700,8 +742,11 @@ def doctor(args) -> None:
         'platform version matches CLI': main.get('platform_version') == VERSION,
         'project-specific manager present': (project / '.go-product-platform/project-skills/go-project-platform-manager/SKILL.md').is_file(),
     }
-    missing = sorted(n for n in expected if not all((p / 'skills' / n / 'SKILL.md').is_file() for p in (AGENT_ROOT,CLAUDE_ROOT)))
-    checks['all activated global skills in both homes'] = not missing
+    missing = sorted(n for n in expected if not all((project / p / 'skills' / n / 'SKILL.md').is_file() for p in project_assets.ROOTS))
+    if ready or main.get('project_assets'):
+        checks['project asset integrity'] = project_assets.healthy(project, main.get('project_assets', {}).get('files', {}))
+    checks['manual present'] = (project / 'MANUAL.md').is_file()
+    checks['all selected skills in both project directories'] = not missing
     if ready:
         profile = main.get('skills_profile')
         checks['profile selected with required skills'] = (
@@ -709,7 +754,7 @@ def doctor(args) -> None:
     for label, ok in checks.items():
         print(f'{"OK  " if ok else "MISS"} {label}')
     if missing:
-        say('Missing global skills: ' + ', '.join(missing))
+        say('Missing project skills: ' + ', '.join(missing))
     if (args.strict or ready) and not all(checks.values()):
         raise RuntimeError('Doctor failed: see MISS items above.')
     if ready:
@@ -853,10 +898,10 @@ def write_active_skills(project: Path) -> None:
     target = project / '.go-product-platform' / 'active-global-skills.md'
     target.parent.mkdir(parents=True, exist_ok=True)
     content = [
-        '# Active global skills for this product',
+        '# Выбранные проектные навыки',
         '', f'Profile: `{profile or "not selected"}`',
-        '', 'Only use the selected global skills as needed by the current task.',
-        'These references do NOT install or copy skills into the project.', '',
+        '', 'Use the installed project skills first, as needed by the current task.',
+        'Install the approved selection into .agents and .claude with skills-project --approve.', '',
     ]
     for skill in active:
         content.append(f'- `{skill}` — выбран для проекта; наличие проверять только с разрешения пользователя')
@@ -1186,7 +1231,7 @@ def wizard(args):
     catalog = catalog_all(manifest)
     print('\n=== Go Product Platform — мастер установки ===')
     print('Можно подключить: Go, API/Buf, React/UI, Wails, Mobile, AI, тестирование, Graphify и Orca.')
-    print('Общие skills живут только в ~/.agents и ~/.claude. Проект хранит только выбранный профиль.')
+    print('Выбранные skills, агенты и референсы устанавливаются в .agents и .claude продукта.')
     check_globals = ask('Проверить наличие глобальных навыков?', True)
     if check_globals:
         data = inventory_data(argparse.Namespace(project=str(project), manifest=args.manifest))
@@ -1204,7 +1249,7 @@ def wizard(args):
         raise RuntimeError('Некорректный номер профиля.')
     profile = options[int(answer) - 1]
     chosen = list(PROFILE_DEFAULTS[profile])
-    print('\nБудут активированы ГЛОБАЛЬНЫЕ skills (без копирования в проект):')
+    print('\nБудут установлены ПРОЕКТНЫЕ skills (с агентами и референсами):')
     for name in chosen:
         print(f'  - {name}: {SKILL_DESCRIPTIONS.get(name, name)}')
     extras = input('Дополнительные skills через запятую (или Enter): ').strip()
@@ -1242,7 +1287,7 @@ def wizard(args):
     print(f'  Глобально установить: {", ".join(to_install + external_installs + (["go-platform-bootstrap"] if bootstrap_install else [])) or "нет"}')
     print(f'  Обновления глобальных skills: {"да" if wants_updates else "нет"}')
     print(f'  Canvas: {canvas_source or "не устанавливать"}')
-    print('  Управляющий skill проекта будет создан внутри .go-product-platform/project-skills/.')
+    print(json.dumps(project_asset_plan(chosen, manifest), ensure_ascii=False, indent=2))
     if not ask('Применить этот план?', False):
         say('Отменено; глобальные skills и проект не менялись.')
         return
@@ -1263,8 +1308,94 @@ def wizard(args):
         upgrade_from_plan(argparse.Namespace(plan=str(planpath), approve=True, manifest=args.manifest))
     if canvas_source:
         install_canvas(argparse.Namespace(project=str(project), source=canvas_source, approve=True))
+    install_project_assets(project, manifest)
     say('Мастер завершён. В следующий раз просто попросите агента проверить или обновить навыки.')
 
+
+
+def project_asset_plan(names: list[str], manifest: dict) -> dict:
+    catalog = catalog_all(manifest)
+    return {
+        'locations': ['.agents', '.claude'],
+        'skills': [{'name': name, 'purpose': SKILL_DESCRIPTIONS.get(name, name.replace('-', ' ')),
+                    'source': catalog[name]['repo'] if name in catalog else 'installed external tool / platform',
+                    'revision': catalog[name].get('revision', 'pinned global snapshot') if name in catalog else 'content hash',
+                    'paths': [f'{root}/skills/{name}' for root in project_assets.ROOTS]}
+                   for name in sorted(set(names))] + [{'name': 'go-project-platform-manager', 'source': 'go-product-platform', 'paths': [f'{root}/skills/go-project-platform-manager' for root in project_assets.ROOTS]}],
+        'agents': ['product-developer', 'product-reviewer'],
+        'references': ['supporting files of each selected skill', 'go-product-platform',
+                       manifest.get('workflow', {'error': 'workflow source not configured'})],
+        'policy': 'Проектные копии имеют приоритет. Установка только после согласования этого списка.',
+    }
+
+
+def install_project_assets(project: Path, manifest: dict) -> None:
+    _, names = project_selection(project)
+    catalog = catalog_all(manifest)
+    files, sources = {}, {}
+    global_lock = json_load(GLOBAL_LOCK)
+    for name in names:
+        source = AGENT_ROOT / 'skills' / name
+        if not (source / 'SKILL.md').is_file():
+            raise RuntimeError(f'Install selected skill before project copy: {name}')
+        if name == 'go-platform-bootstrap':
+            prefix = 'skills/go-platform-bootstrap'
+            project_assets.collect(HERE / 'platform/skills/go-platform-bootstrap', prefix, files)
+            project_assets.collect(HERE / 'installer', prefix + '/runtime/installer', files)
+            project_assets.collect(HERE / 'platform', prefix + '/runtime/platform', files)
+        else:
+            project_assets.collect(source.resolve(), 'skills/' + name, files)
+        entry = catalog.get(name)
+        if entry:
+            pinned = global_lock.get('skills', {}).get(name)
+            if not pinned:
+                raise RuntimeError(f'Missing provenance for selected skill: {name}')
+            if entry.get('revision') and pinned['commit'] != entry['revision']:
+                raise RuntimeError(f'{name}: installed revision differs from approved manifest')
+            snapshot = GLOBAL_PLATFORM / 'vendor' / entry['key'] / pinned['commit']
+            if not source.resolve().is_relative_to(snapshot.resolve()):
+                raise RuntimeError(f'{name}: installed source differs from lock')
+            sources[entry['key']] = {'repo': entry['repo'], 'commit': pinned['commit']}
+            if entry.get('references'):
+                project_assets.collect(snapshot / entry['references'], 'references', files)
+            if entry.get('agents'):
+                project_assets.collect(snapshot / entry['agents'], 'agents', files)
+            for resource in entry.get('resources', []):
+                project_assets.collect(snapshot / resource, resource, files)
+        else:
+            sources[name] = {'origin': 'installed external tool / platform', 'path': str(source.resolve())}
+    workflow = manifest.get('workflow')
+    if not workflow:
+        raise RuntimeError('Manifest must configure software-development-workflow')
+    snapshot, sha = cache_source(workflow)
+    if not (snapshot / 'docs/workflow.md').is_file():
+        raise RuntimeError('software-development-workflow docs/workflow.md missing')
+    project_assets.collect(snapshot, 'references/software-development-workflow', files)
+    sources[workflow['key']] = {'repo': workflow['repo'], 'commit': sha}
+    project_assets.collect(HERE / 'platform/references', 'references/go-product-platform', files)
+    project_assets.collect(HERE / 'platform/handbook', 'references/go-product-platform/handbook', files)
+    project_assets.collect(HERE / 'platform/project-agents', 'agents', files)
+    project_assets.collect(HERE / 'platform/project-skill-templates/go-project-platform-manager',
+                           'skills/go-project-platform-manager', files)
+    lockfile = project / 'go-product-platform.lock.json'
+    lock = json_load(lockfile)
+    hashes = project_assets.install(project, files, lock.get('project_assets', {}).get('files', {}))
+    lock['project_assets'] = {'sources': sources, 'files': hashes}
+    save_json(lockfile, lock)
+    write_bridge(project)
+    say('Project skills, agents and references installed in .agents and .claude.')
+
+
+def skills_project(args) -> None:
+    project = Path(args.project).expanduser().resolve()
+    assert_git(project)
+    manifest = load_manifest(manifest_path(args))
+    _, names = project_selection(project)
+    if not names:
+        raise RuntimeError('Select a project skill profile first')
+    print(json.dumps(project_asset_plan(names, manifest), ensure_ascii=False, indent=2))
+    if args.approve:
+        install_project_assets(project, manifest)
 
 
 def parser() -> argparse.ArgumentParser:
@@ -1277,6 +1408,12 @@ def parser() -> argparse.ArgumentParser:
     for option in ('app', 'kit', 'color', 'tag'):
         canvas.add_argument('--' + option)
     canvas.set_defaults(handler=install_canvas)
+    pa = commands.add_parser('skills-project', help='Review/install portable project skills, agents and references')
+    pa.add_argument('--project', default='.')
+    pa.add_argument('--manifest')
+    pa.add_argument('--json', action='store_true')
+    pa.add_argument('--approve', action='store_true')
+    pa.set_defaults(handler=skills_project)
     commands.add_parser('install-cli').set_defaults(handler=install_cli)
     g = commands.add_parser('setup-global', help='Once per macOS account: shared skills and tools')
     for flag in ('skills','graphify','orca','dry-run','offline','refresh','continue-on-error'):
@@ -1291,6 +1428,7 @@ def parser() -> argparse.ArgumentParser:
     i.add_argument('--offline', action='store_true', help='Restore materials without network/global writes; incompatible with setup options')
     i.add_argument('--setup', action='store_true', help='Print a profile setup contract to complete and review (no writes)')
     i.add_argument('--profile', choices=list(PROFILE_DEFAULTS))
+    i.add_argument('--names', default='', help='Additional skills for the setup preview')
     i.add_argument('--json', action='store_true', help='Machine-readable setup contract; use with --setup')
     i.add_argument('--setup-plan', help='Apply a reviewed JSON setup contract, including its commands and missing global skills')
     i.add_argument('--approve', action='store_true')
