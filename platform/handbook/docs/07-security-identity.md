@@ -16,7 +16,9 @@ next: 08-builtin-capabilities.md
 
 **В этом документе:** [Безопасность: Rauthy, OpenBao, RustFS](#security) · [Identity, сессии и авторизация](#identity-access-v11) · [Секреты: минимальный профиль и общий OpenBao](#secrets-v11)
 
-## Безопасность: Rauthy, OpenBao, RustFS {#security}
+<a name="security"></a>
+
+## Безопасность: Rauthy, OpenBao, RustFS
 
 **Rauthy:** OIDC, MFA/passkeys, идентичность; Go API валидирует issuer/audience/JWKS и исполняет авторизацию `subject × action × resource × tenant`. Для сложных объектных прав добавить OpenFGA/Casbin только если это реально требуется. Не доверять только UI-ролям.
 
@@ -26,7 +28,9 @@ next: 08-builtin-capabilities.md
 
 **Mobile/desktop:** access/refresh tokens — Keychain / Android Keystore / platform-secure storage; не хранить серверные master keys. Любой Wails bridge метод проверяет permissions. Внешний HTML открывать вне привилегированного WebView; при iframe проводить независимую security review.
 
-## Идентификация, сессии и авторизация без отдельного сервиса пользователей {#identity-access-v11}
+<a name="identity-access-v11"></a>
+
+## Идентификация, сессии и авторизация без отдельного сервиса пользователей
 
 **Три разных уровня:** (1) аутентификация устанавливает, кто вошёл; (2) локальная учетная модель хранит членство, роль и профиль; (3) прикладная авторизация разрешает конкретное действие над конкретным ресурсом.
 
@@ -55,7 +59,9 @@ func Authorize(ctx context.Context, actor Actor, action string, scope ResourceSc
 
 **Проверка отказов:** один пользователь обращается к ресурсу другой организации; отозванная роль; чужой export/download; попытка подписаться на другую область данных; замена идентификатора через RPC; старый access token после блокировки. Тестирование только успешного сценария недостаточно.
 
-## Секреты: минимальный профиль и общий OpenBao при необходимости {#secrets-v11}
+<a name="secrets-v11"></a>
+
+## Секреты: минимальный профиль и общий OpenBao при необходимости
 
 **Минимальный профиль:** в DEV — `.env.local` вне Git (только тестовые значения), в PROD на VM — root-owned файлы / Compose secrets, шифрованные в Git через SOPS+age и расшифрованные при deployment. Compose secrets монтируются в контейнер как файлы; исходный файл на VM всё равно надо защищать. Шифрованные пользовательские токены хранятся в PostgreSQL вместе с `key_version`, а ключ шифрования приходит **извне этой БД**.
 
