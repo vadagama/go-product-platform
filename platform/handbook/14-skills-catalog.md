@@ -58,7 +58,6 @@ next: 15-ade-platform.md
 | [`react-best-practices`](https://github.com/vercel-labs/agent-skills/blob/main/skills/react-best-practices/SKILL.md) | Уменьшает лишние render, загрузку JavaScript и задержки интерфейса. | **P0**, Vercel |
 | [`composition-patterns`](https://github.com/vercel-labs/agent-skills/blob/main/skills/composition-patterns/SKILL.md) | Учит собирать компоненты через композицию без громоздких props и сложных иерархий. | **P1**, архитектура React |
 | [`tanstack-query-development`](https://github.com/axross/skills/blob/main/skills/tanstack-query-development/SKILL.md) | Ключи запросов, инвалидация кэша, мутации, оптимистический интерфейс, повторная загрузка и ошибки. | **P1**, слой данных |
-| [`tailwind-design-system`](https://github.com/wshobson/agents/blob/main/plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md) | Tailwind v4, семантические дизайн-токены, темы и responsive-правила. | **P1**, библиотека интерфейса |
 | [`web-design-guidelines`](https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md) | Ревью UX: навигация, формы, focus, accessibility и работа с клавиатурой. | **P1**, аудит интерфейса; **зафиксировать версию правил** |
 
 **Wails:** найденный `wails` содержит устаревшую оценку статуса v3. Нельзя разрешать агенту смешивать API Wails v2/v3. Источник истины — **установленная версия Wails 3 и её официальные примеры**. Для Android/iOS не выдавать экспериментальный runtime за стабильный.
@@ -82,13 +81,12 @@ next: 15-ade-platform.md
 
 | Когда подключать | Навык / GitHub | Что делает |
 |---|---|---|
-| ИИ-агент Service | [`ai-sdk`](https://github.com/vercel/ai/blob/main/skills/use-ai-sdk/SKILL.md) — **P1, Vercel** | Vercel AI SDK: `ToolLoopAgent`, tools, потоковая передача, models, UI транспорт; сверяет API с установленной версией. |
+| ИИ-агент Service | [`ai-sdk`](https://github.com/vercel/ai/blob/main/skills/ai-sdk/SKILL.md) — **P1, Vercel** | Vercel AI SDK: `ToolLoopAgent`, tools, потоковая передача, models, UI транспорт; сверяет API с установленной версией. |
 | AI UI / Chat | [`ai-elements`](https://github.com/vercel/ai-elements/blob/main/skills/ai-elements/SKILL.md) — **P1, Vercel** | Компоненты сообщений, tool calls, потоковая передача и ввода для shadcn. |
 | Нативные iOS/macOS | [`swiftui-expert-skill`](https://github.com/AvdLee/SwiftUI-Agent-Skill/blob/main/skills/swiftui-expert-skill/SKILL.md) — **P1** | SwiftUI, состояние, навигация, производительность и доступность. |
 | Swift async/await | [`swift-concurrency`](https://github.com/AvdLee/Swift-Concurrency-Agent-Skill/blob/main/skills/swift-concurrency/SKILL.md) — **P1** | Изоляция акторов, `Sendable`, структурированная конкурентность и гонки данных. |
 | Нативный Android | [`jetpack-compose-performance`](https://github.com/android/skills/blob/main/jetpack-compose/jetpack-compose-performance/SKILL.md) — **P1, Google** | Оптимизирует повторную композицию, списки, state и плавность Compose. |
 | Тесты на устройствах Android | [`testing-setup`](https://github.com/android/skills/blob/main/testing/testing-setup/SKILL.md) — **P1, Google** | Настраивает тестовое окружение Android и проверки на эмуляторе/устройстве. |
-| OAuth/OIDC | [`secure-oauth-oidc`](https://github.com/citypaul/.dotfiles/blob/main/claude/.claude/skills/secure-oauth-oidc/SKILL.md) — **Опционально** | PKCE, tokens, JWKS и защита процесс входа; применять вместе с официальными протоколами и негативные тесты. |
 | OpenBao | [`openbao-general`](https://github.com/Getty/p5-www-openbao/blob/main/.claude/skills/openbao-general/SKILL.md) — **Опционально** | KV/Auth/API-приемы для интеграции с OpenBao; **не** полноценный инструкция по обеспечению безопасности сервера. |
 
 Здесь **не выбраны** навыки из внутреннего репозитория RustFS: они предназначены преимущественно для разработки самого RustFS, а Go-клиенту достаточно AWS SDK for Go v2, контрактных тестов совместимости с S3 и официальной [документации RustFS](https://github.com/rustfs/rustfs). Отдельные навыки по React Native/Expo подключаются только при реальном выборе этой альтернативы, чтобы не конфликтовать с Wails/native стратегией.
@@ -103,14 +101,14 @@ Bootstrap и внешние CLI устанавливаются на машину
 и отслеживается в Git. Проектные версии имеют приоритет над глобальными.
 
 В оба каталога устанавливаются `skills/`, `agents/` и `references/`, включая
-software-development-workflow и его шаблоны. Происхождение и ревизии источников
-фиксируются в реестре `docs/agent-skills.md`. Глобальное обновление не
+референсы и шаблоны процесса разработки. Происхождение и ревизии источников
+фиксируются в engineering.yaml продукта. Глобальное обновление не
 меняет копии продукта. Применяйте только навыки, относящиеся к задаче.
 
-`AGENTS.md` и `CLAUDE.md` на русском требуют соблюдать флоу
-software-development-workflow. `MANUAL.md` описывает настройку, запуск и проверки.
+`AGENTS.md` и `CLAUDE.md` на русском требуют соблюдать процесс
+разработки. `MANUAL.md` описывает настройку, запуск и проверки.
 Новый worktree получает набор из Git без установки; полная настройка проекта
-выполняется агентом по [product-setup.md](../../skills/go-platform-bootstrap/references/product-setup.md)
+выполняется агентом по [go-platform-bootstrap](../skills/go-platform-bootstrap/SKILL.md)
 после согласования состава набора.
 
 <a name="skills-routing"></a>
@@ -136,7 +134,7 @@ software-development-workflow. `MANUAL.md` описывает настройку
 
 ### Политика доверия и управления версиями
 
-1. **Pin commit SHA / release** для глобально устанавливаемых навыков в реестре продукта `docs/agent-skills.md` (для глобальной установки без продукта — в отчёте установки); `main` в таблице — ссылка для чтения, **не** зафиксированная dependency.
+1. **Pin commit SHA / release** для глобально устанавливаемых навыков в engineering.yaml продукта (для глобальной установки без продукта — в отчёте установки); `main` в таблице — ссылка для чтения, **не** зафиксированная dependency.
 2. Проверять исполняемые скрипты, shell-команды, сетевые обращения и инструкции изменения конфигурации. Не давать сторонним навыкам доступ к учётным данным рабочей среды.
 3. Контролировать **неявные обновления**: `web-design-guidelines` загружает текущие правила из сетевого источника при каждом ревью; для воспроизводимости заменить URL на фиксированный commit/локальную копию, прежде чем включать в автономный pipeline.
 4. Учитывать **drift API**: особенно Wails 3, Connect-Go v2 и mobile SDK. Авторитетнее инструкций навыков — документация установленной версии, компилятор и проверяемый тест.

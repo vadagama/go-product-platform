@@ -1,3 +1,12 @@
+---
+id: "REF-canvas-installation"
+description: "Подключение опционального canvas для UI: официальный установщик app-canvas, роли .canvas/ и design/, связь брифов с инженерной SPEC и маршрутизация UI-запросов. Читать при настройке продукта с интерфейсом и в UI-задачах."
+kind: "reference"
+status: "current"
+owner: "maintainer"
+related: ["platform-installation.md", "../README.md", "../templates/README.md"]
+---
+
 # Опциональный canvas для UI/фронтэнда
 
 Источник: [app-canvas](https://gitlab16.skiftrade.kz/design/app-canvas), официальный
@@ -32,6 +41,39 @@ python3 /tmp/app-canvas-installer/canvas_setup.py   # из корня проду
 заменяет `docs/specs/<SPEC-ID>/` и единый список `tasks.md`.
 Общие навыки остаются глобальными; собственные адаптеры canvas устанавливаются его
 штатным механизмом. Не копировать наборы навыков вручную.
+
+Связь с инженерной SPEC — двусторонние ссылки между отслеживаемыми документами.
+Из SPEC в дизайн: поле `affected_docs` или раздел «Дизайн-пакет» в
+`requirements.md` и `design.md` перечисляет затронутые брифы
+`design/specs/briefs/`. Из брифа в SPEC: секция «Связь с инженерной SPEC»
+содержит путь `docs/specs/<SPEC-ID>/` и задачи `T-XX` из единого `tasks.md`.
+Канвасные команды не ведут второй список задач — они раскрывают задачи SPEC
+на экраны.
+
+Маршрутизация UI-запроса: изменение поведения или контрактов сначала проходит
+`spec-driven-development` (создание или обновление SPEC), затем бриф ссылается
+на неё; косметика и экран без логики — бриф без SPEC, при появлении SPEC ссылка
+добавляется в бриф и `affected_docs`. Для критериев с UI в `verification.md`
+приводят бриф и реальный Playwright-тест; в `review.md` указывают
+результат `canvas-review`, записанный в брифе. Согласованность ссылок — каждый
+SPEC-ID из `design/specs/` существует в `docs/specs/`, у SPEC с UI-задачами есть
+бриф — проверяет пайплайн продукта.
+
+```mermaid
+flowchart TD
+    Q["UI-запрос"] --> R{"Меняет поведение<br/>или контракты?"}
+    R -- "да" --> SDD["spec-driven-development:<br/>создать/обновить SPEC"]
+    R -- "нет — косметика" --> BR["design/specs/briefs/<br/>бриф экрана"]
+    SDD --> SPEC["docs/specs/SPEC-ID/<br/>requirements.md, design.md"]
+    SPEC -- "affected_docs,<br/>«Дизайн-пакет»" --> BR
+    BR -- "«Связь с инженерной SPEC»:<br/>SPEC-ID, T-XX" --> SPEC
+    SPEC --> TASKS["tasks.md —<br/>единый список T-XX"]
+    TASKS -- "задачи раскрывают<br/>на экраны" --> BR
+    BR --> VER["verification.md:<br/>бриф + Playwright-тест"]
+    BR --> REV["review.md:<br/>результат canvas-review"]
+    CI["пайплайн: согласованность<br/>ссылок"] -.-> SPEC
+    CI -.-> BR
+```
 
 После установки из корня продукта выполнить шаги, напечатанные установщиком,
 `python3 .canvas/board.py doctor`, затем `python3 .canvas/board.py serve` и сообщить
