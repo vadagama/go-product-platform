@@ -1,17 +1,19 @@
 ---
 id: "REF-skill-sources"
+description: "Единственный каталог источников навыков: составы профилей и критерии компонентов, репозитории и состав навыков каждого источника, локальные навыки без публичного источника, отдельно устанавливаемые инструменты (Graphify, Orca, canvas) и правила установки с фиксацией ревизий в engineering.yaml. Читать при выборе профиля, подборе, установке и обновлении набора."
 kind: "reference"
 status: "current"
 owner: "maintainer"
-related: ["product-setup.md", "../SKILL.md"]
+related: ["../SKILL.md"]
 ---
 
 # Каталог источников навыков
 
-Единственный источник истины о том, откуда брать навыки, агентов и референсы.
-Это данные, а не код: чтобы добавить источник или путь — дополните таблицу и
+Единственный источник истины о составах профилей и о том, откуда брать
+навыки, агентов и референсы.
+Это данные, а не код: чтобы добавить источник — дополните таблицу и
 перечислите изменение в плане согласования. Ревизии (commit SHA) фиксируются
-не здесь, а в реестре набора продукта `docs/agent-skills.md` после
+не здесь, а в engineering.yaml продукта после
 каждой установки.
 
 Установка выполняет агент: клонировать источник в общую временную папку,
@@ -24,40 +26,129 @@ flowchart LR
     A["Клон источника<br/>(git clone, фиксированный SHA)"] --> B["Копирование каталогов навыков"]
     B --> C["~/.agents/skills/"]
     B --> D["~/.claude/skills/"]
-    C --> E[".agents/ и .claude/ продукта<br/>(согласованный набор)"]
-    D --> E
-    F["Реестр продукта<br/>docs/agent-skills.md"]
 ```
+
+Копирование согласованного набора в продукт (`.agents/` и `.claude/`) и фиксация
+ревизий в engineering.yaml — [SKILL.md](../SKILL.md#инициализация-репозитория-продукта); полный
+жизненный цикл набора —
+[skills-installation.md](../../../references/skills-installation.md).
 
 ## Источники навыков
 
-| Источник | Репозиторий | Навыки: путь в клоне | Референсы и ресурсы |
-|---|---|---|---|
-| addyosmani | https://github.com/addyosmani/agent-skills | `skills/<имя>` для: spec-driven-development, test-driven-development, incremental-implementation, code-review-and-quality, code-simplification, source-driven-development, security-and-hardening, planning-and-task-breakdown, context-engineering, api-and-interface-design, debugging-and-error-recovery, git-workflow-and-versioning, constraint-driven-development, documentation-and-adrs, using-agent-skills, interview-me, idea-refine, doubt-driven-development, frontend-ui-engineering, browser-testing-with-devtools, performance-optimization, accessibility-engineering, ci-cd-and-automation, deprecation-and-migration, observability-and-instrumentation, shipping-and-launch | `references/` — общие референсы |
-| superpowers | https://github.com/obra/superpowers | `skills/verification-before-completion`, `skills/systematic-debugging`, `skills/using-git-worktrees` | — |
-| samber-go | https://github.com/samber/cc-skills-golang | `skills/golang-design-patterns`, `skills/golang-database`, `skills/golang-testing`, `skills/golang-concurrency`, `skills/golang-security` | — |
-| go-architecture | https://github.com/eduardo-sl/go-agent-skills | `skills/(architecture)/go-architecture-review` | — |
-| buf-protobuf | https://github.com/bufbuild/claude-plugins | `plugins/protobuf/skills/protobuf` | — |
-| wails | https://github.com/spf13/go-skills | `wails` | — |
-| shadcn | https://github.com/shadcn-ui/ui | `skills/shadcn` | — |
-| vercel-react | https://github.com/vercel-labs/agent-skills | `skills/react-best-practices`, `skills/composition-patterns`, `skills/web-design-guidelines` | — |
-| tanstack-query | https://github.com/axross/skills | `skills/tanstack-query-development` | — |
-| tailwind-design | https://github.com/wshobson/agents | `plugins/frontend-mobile-development/skills/tailwind-design-system` | — |
-| microsoft-playwright | https://github.com/microsoft/playwright-cli | `skills/playwright-cli` | — |
-| microsoft-accessibility | https://github.com/microsoft/a11y-llm-eval | `config/skills/building-accessible-ui` | — |
-| vercel-ai | https://github.com/vercel/ai | `skills/use-ai-sdk` | — |
-| vercel-ai-elements | https://github.com/vercel/ai-elements | `skills/ai-elements` | — |
-| swiftui | https://github.com/AvdLee/SwiftUI-Agent-Skill | `skills/swiftui-expert-skill` | — |
-| swift-concurrency | https://github.com/AvdLee/Swift-Concurrency-Agent-Skill | `skills/swift-concurrency` | — |
-| android | https://github.com/android/skills | `jetpack-compose/jetpack-compose-performance`, `testing/testing-setup` | — |
-| oauth | https://github.com/citypaul/.dotfiles | `claude/.claude/skills/secure-oauth-oidc` | — |
-| openbao | https://github.com/Getty/p5-www-openbao | `.claude/skills/openbao-general` | — |
+| Источник | Репозиторий | Описание |
+|---|---|---|
+| addyosmani | https://github.com/addyosmani/agent-skills | Библиотека общих инженерных навыков: спеки и идеи (`spec-driven-development`, `interview-me`, `idea-refine`); процесс разработки (`test-driven-development`, `incremental-implementation`, `planning-and-task-breakdown`, `constraint-driven-development`, `source-driven-development`, `git-workflow-and-versioning`, `documentation-and-adrs`, `context-engineering`, `using-agent-skills`); качество и дизайн (`code-review-and-quality`, `code-simplification`, `debugging-and-error-recovery`, `security-and-hardening`, `doubt-driven-development`, `api-and-interface-design`); фронтенд (`frontend-ui-engineering`, `browser-testing-with-devtools`, `performance-optimization`, `accessibility-engineering`); эксплуатация (`ci-cd-and-automation`, `observability-and-instrumentation`, `deprecation-and-migration`, `shipping-and-launch`). В клоне есть и общие референсы `references/`. |
+| superpowers | https://github.com/obra/superpowers | Дисциплина выполнения: `verification-before-completion` (проверка результата перед заявлением о готовности), `systematic-debugging` (систематическая отладка), `using-git-worktrees` (работа в git-worktrees). |
+| samber-go | https://github.com/samber/cc-skills-golang | Идиоматичный Go: `golang-design-patterns` (паттерны проектирования), `golang-database` (работа с БД), `golang-testing` (тестирование), `golang-concurrency` (конкурентность), `golang-security` (безопасность). |
+| go-architecture | https://github.com/eduardo-sl/go-agent-skills | Ревью архитектуры Go-проектов: навык `go-architecture-review`. |
+| buf-protobuf | https://github.com/bufbuild/claude-plugins | Плагины Buf: навык `protobuf` — дизайн схем, buf CLI, gRPC/Connect, protovalidate, эволюция схем, разбор lint/breaking ошибок. |
+| wails | https://github.com/spf13/go-skills | Навык `wails` — десктоп-приложения на Go с вебвью: v2 и v3, биндинги Go и фронтенда, сборка, отладка. |
+| shadcn | https://github.com/shadcn-ui/ui | Репозиторий shadcn/ui: навык `shadcn` — установка и управление компонентами, пресеты, дизайн-системы, применение DESIGN.md. |
+| vercel-react | https://github.com/vercel-labs/agent-skills | Навыки Vercel для фронтенда: `react-best-practices` (производительность React/Next.js), `composition-patterns` (паттерны композиции), `react-native-skills` (React Native и Expo), `react-view-transitions` (анимации переходов между экранами), `deploy-to-vercel` (деплой на Vercel), `vercel-cli-with-tokens` (CLI с токенами доступа), `vercel-optimize` (стоимость и производительность на Vercel), `web-design-guidelines` (аудит веб-интерфейсов), `writing-guidelines` (стиль документации). |
+| microsoft-playwright | https://github.com/microsoft/playwright-cli | Официальный навык `playwright-cli` — автоматизация браузера, тестирование веб-страниц и Playwright-тестов. |
+| microsoft-accessibility | https://github.com/microsoft/a11y-llm-eval | Навык `building-accessible-ui` (в репозитории — `config/skills/building-accessible-ui/`) — построение доступного UI по оценкам доступности Microsoft. |
+| vercel-ai | https://github.com/vercel/ai | Репозиторий AI SDK: навык `ai-sdk` (в репозитории — `skills/ai-sdk/`) — работа с AI SDK. |
+| vercel-ai-elements | https://github.com/vercel/ai-elements | Навык `ai-elements` — готовые AI-компоненты интерфейса (чат, генеративный UI). |
+| swiftui | https://github.com/AvdLee/SwiftUI-Agent-Skill | Экспертный навык `swiftui-expert-skill` — разработка интерфейсов на SwiftUI. |
+| swift-concurrency | https://github.com/AvdLee/Swift-Concurrency-Agent-Skill | Навык `swift-concurrency` — async/await, акторы и задачи в Swift. |
+| android | https://github.com/android/skills | Официальные навыки Android: `jetpack-compose-performance` (производительность Jetpack Compose), `testing-setup` (настройка тестирования). |
+| openbao | https://github.com/Getty/p5-www-openbao | Навык `openbao-general` (в репозитории — `.claude/skills/openbao-general/`) — общие вопросы работы с OpenBao (секреты). |
+| supabase | https://github.com/supabase/agent-skills | Официальные навыки Supabase: `supabase` (работа с любыми продуктами Supabase: Database, Auth, Edge Functions, Storage, CLI, отладка) и `supabase-postgres-best-practices` (практики Postgres: схема, миграции, RLS, индексы, производительность). |
 
-## Стандарт процесса (особый источник)
+## Локальные навыки
 
-| Источник | Репозиторий | Что устанавливать | Куда |
-|---|---|---|---|
-| software-development-workflow | https://github.com/vadagama/software-development-workflow | `docs/`, `templates/`, `examples/` с сохранением имён подкаталогов | `.agents/references/software-development-workflow/{docs,templates,examples}/` и `.claude/references/software-development-workflow/{docs,templates,examples}/` |
+Установлены глобально в `~/.agents/skills/` и `~/.claude/skills/` вне
+публичных источников; при настройке продукта копируются в проект напрямую.
+При появлении публичного источника навык переносится в таблицу выше.
+
+| Навык | Назначение |
+|---|---|
+| impeccable | Дизайн и полировка фронтенд-интерфейсов: UX-ревью, иерархия, типографика, цвет, движение, UX-тексты, доступность; фиксация дизайн-системы (DESIGN.md, токены). |
+| telegram-bot-ui | Интерфейс Telegram-ботов: тексты и микрокопирайтинг, клавиатуры и кнопки, навигация и подтверждения, состояния, стриминг AI-ответов, форматирование сообщений. |
+| yandex-cloud-engineer | Инфраструктура Yandex Cloud как код: Terraform, landing zone, IAM, VPC, Managed Kubernetes, DNS, резервное копирование, GitLab CI/CD, HLD/ADR. |
+
+## Профили и критерии
+
+Все стартовые пути опросника используют одни критерии готовности. При подготовке
+без описания продукта проверяется техническая основа выбранного стека; предметные
+функции и бизнес-требования не придумываются. Для идеи или готовых требований
+основа учитывает выясненные ограничения, но настройка не означает реализацию
+всего продукта. Подтверждение понимания требований предшествует выбору итогового
+стека; установка выполняется после согласования конкретного плана настройки.
+
+Составы профилей правятся прямо в этом документе (таблица ниже) — это данные.
+
+| Профиль | Состав навыков (общая основа + дополнения) |
+|---|---|
+| go-api | [база](../SKILL.md#проектный-набор-агентных-материалов) + golang-design-patterns, golang-database, golang-testing, golang-security, go-architecture-review, protobuf, systematic-debugging |
+| web | база + golang-design-patterns, golang-database, golang-testing, protobuf, shadcn, react-best-practices, playwright-cli, systematic-debugging |
+| desktop | база + golang-design-patterns, golang-testing, protobuf, wails, shadcn, playwright-cli, systematic-debugging |
+| mobile-native | база + golang-testing, protobuf, swiftui-expert-skill, swift-concurrency, jetpack-compose-performance, testing-setup |
+| ai | база + golang-testing, protobuf, ai-sdk, ai-elements, security-and-hardening |
+| custom | база + явно согласованные навыки; технологические исключения фиксируются в docs/agent-policy.md |
+
+База каждого профиля — graphify, go-platform-bootstrap, go-project-platform-manager
+и набор навыков процесса [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills),
+устанавливаемый по инструкциям своего репозитория
+([состав](../SKILL.md#полный-список-устанавливаемых-и-проверяемых-навыков)).
+Референсы и шаблоны процесса разработки входят во все профили, включая `custom`;
+custom меняет технологический состав, но сохраняет обязательный процесс и
+структуру документации.
+
+Назначение профильных дополнений и их профили:
+
+| Навык | Назначение | В профилях |
+|---|---|---|
+| [golang-design-patterns](https://github.com/samber/cc-skills-golang/blob/main/skills/golang-design-patterns/SKILL.md) | идиоматичный Go, композиция, минимум лишних интерфейсов | go-api, web, desktop |
+| [golang-database](https://github.com/samber/cc-skills-golang/blob/main/skills/golang-database/SKILL.md) | PostgreSQL, `pgx`, транзакции, пулы, миграции | go-api, web |
+| [golang-testing](https://github.com/samber/cc-skills-golang/blob/main/skills/golang-testing/SKILL.md) | модульные, интеграционные и табличные тесты, фаззинг | go-api, web, desktop, mobile-native, ai |
+| [golang-security](https://github.com/samber/cc-skills-golang/blob/main/skills/golang-security/SKILL.md) | границы доверия, инъекции, секреты, обработка ввода | go-api |
+| [go-architecture-review](https://github.com/eduardo-sl/go-agent-skills/blob/main/skills/%28architecture%29/go-architecture-review/SKILL.md) | аудит границ, владения и зависимостей модулей | go-api |
+| [protobuf](https://github.com/bufbuild/claude-plugins/blob/main/plugins/protobuf/skills/protobuf/SKILL.md) | `.proto`, Buf lint/generate, контракты Connect/gRPC | go-api, web, desktop, mobile-native, ai |
+| [systematic-debugging](https://github.com/obra/superpowers/blob/main/skills/systematic-debugging/SKILL.md) | поиск первопричины сбоя, а не симптома | go-api, web, desktop |
+| [shadcn](https://github.com/shadcn-ui/ui/blob/main/skills/shadcn/SKILL.md) | подбор и настройка UI-компонентов, дизайн-токены | web, desktop |
+| [react-best-practices](https://github.com/vercel-labs/agent-skills/blob/main/skills/react-best-practices/SKILL.md) | лишние рендеры, размер бандла, задержки React | web |
+| [playwright-cli](https://github.com/microsoft/playwright-cli/blob/main/skills/playwright-cli/SKILL.md) | агентное браузерное E2E, трассировки и снимки | web, desktop |
+| [wails](https://github.com/spf13/go-skills/blob/main/wails/SKILL.md) | Go↔JS bindings, окна и сборка desktop (адаптировать под v3) | desktop |
+| [swiftui-expert-skill](https://github.com/AvdLee/SwiftUI-Agent-Skill/blob/main/skills/swiftui-expert-skill/SKILL.md) | SwiftUI: состояние, навигация, доступность | mobile-native |
+| [swift-concurrency](https://github.com/AvdLee/Swift-Concurrency-Agent-Skill/blob/main/skills/swift-concurrency/SKILL.md) | акторы, `Sendable`, структурированная конкурентность | mobile-native |
+| [jetpack-compose-performance](https://github.com/android/skills/blob/main/jetpack-compose/jetpack-compose-performance/SKILL.md) | повторная композиция, списки и плавность Compose | mobile-native |
+| [testing-setup](https://github.com/android/skills/blob/main/testing/testing-setup/SKILL.md) | тестовое окружение Android, эмулятор/устройство | mobile-native |
+| [ai-sdk](https://github.com/vercel/ai/blob/main/skills/ai-sdk/SKILL.md) | Vercel AI SDK: tools, агентные циклы, стриминг | ai |
+| [ai-elements](https://github.com/vercel/ai-elements/blob/main/skills/ai-elements/SKILL.md) | UI чата, tool calls и ввод для shadcn | ai |
+| [security-and-hardening](https://github.com/addyosmani/agent-skills/blob/main/skills/security-and-hardening/SKILL.md) | усиление безопасности приложения | ai |
+
+Общие компоненты каждого профиля и их проверки:
+
+| Компонент | Что подготовить | Чем подтвердить |
+|---|---|---|
+| go | Go-модуль, feature-oriented пакеты, entrypoint, тесты | `go test ./...`, `go build ./...` из корня модуля |
+| contracts | Protobuf, Buf lint и генераторы Connect, зафиксированные версии | `buf lint`, `buf generate`, сборка полученных контрактов |
+| database | PostgreSQL + pgx/sqlc и миграции; для offline desktop — SQLite по HLD | Реальная проверка подключения, применение миграций в отдельной dev/test БД и integration-тест |
+| environment | Версии инструментов, env example, команды запуска/остановки, изоляция worktree | Smoke-тест процесса и healthcheck; проверить отдельные порты/БД/logs каждого worktree |
+
+Дополнения по профилям:
+
+| Профиль | Компоненты | Что проверить |
+|---|---|---|
+| go-api | Общая основа, PostgreSQL | API/integration + модульные тесты |
+| web | frontend, ui, e2e | Vite + React + TS; shadcn/Tailwind; production build, typecheck, браузерный smoke с вызовом API |
+| ai | web + ai | AI SDK/AI Elements по месту, серверная граница ключей; тест адаптера без секрета, smoke с провайдером при наличии доступа |
+| desktop | frontend, ui, e2e, desktop | Wails v3 + React, bindings, SQLite/PG по архитектуре; native build и smoke приложения на целевой ОС |
+| mobile-native | mobile | Go API и выбранные SwiftUI/Compose клиенты; SDK, сборка и smoke на симуляторе/эмуляторе выбранной платформы |
+| custom | Общая основа + нужные дополнительные компоненты | Адаптации и исключения записать в HLD и docs/agent-policy.md, добавить проверки в чек-лист |
+
+Проверки инструментов — минимум; дополните graphify, sqlc, goose, mise, Swift/Xcode,
+Android SDK/Gradle и другими фактически выбранными инструментами. Для pg/мобильных
+проверок CLI version недостаточно: проверки компонентов должны обращаться к среде.
+Зависимость «нужны credentials» нельзя заменить фиктивной зелёной проверкой.
+
+## Референсы процесса (особый источник)
+
+Референсы и шаблоны процесса разработки устанавливаются в `.agents/references/`
+и `.claude/references/` (подкаталоги `docs/`, `templates/`, `examples/` с
+сохранением имён). Источник и ревизия согласуются при настройке и фиксируются
+в `engineering.yaml` продукта.
 
 ## Отдельно устанавливаемые инструменты с навыками
 
@@ -69,11 +160,15 @@ flowchart LR
 
 ## Правила
 
-- Пути в таблице — относительно корня клона. Имя установки обычно совпадает с каталогом;
-  для `skills/use-ai-sdk` имя установки — `ai-sdk`, как в профиле. Проверяйте `name`
-  в SKILL.md; расхождения имён явно фиксируйте в плане и реестре.
+- Имя установки обычно совпадает с каталогом навыка в клоне источника.
+  Проверяйте `name` в SKILL.md; расхождения имён явно фиксируйте в плане
+  и engineering.yaml (например, в vercel-labs/agent-skills каталоги без
+  префикса, а `name` — с префиксом `vercel-`).
+- Перечисленные составы источников — курируемые подмножества: берите только
+  перечисленные навыки, даже если в клоне их больше; состав может покрывать
+  весь источник (addyosmani) или быть выборкой (у samber — 5 из ~44).
 - Перед копированием убедитесь, что каталог содержит `SKILL.md`.
-- Пин ревизии: записывайте в реестр продукта SHA и источник; для не-Git снимка — версию или дату вместе с контрольной суммой.
+- Пин ревизии: записывайте в engineering.yaml продукта SHA и источник; для не-Git снимка — версию или дату вместе с контрольной суммой.
 - Конфликт имён: существующий навык не перезаписывается; новое имя или явное
   решение пользователя.
 - Обновления глобальных копий затрагивают все продукты на машине — отдельное

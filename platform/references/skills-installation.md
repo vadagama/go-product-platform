@@ -1,9 +1,10 @@
 ---
-id: "REF-ade-installation"
+id: "REF-skills-installation"
+description: "Каталоги навыков агентских сред, приоритет проектного набора над глобальным, границы операций и порядок обновлений по согласованию. Читать при вопросах о расположении наборов навыков и их обновлении."
 kind: "reference"
 status: "current"
 owner: "maintainer"
-related: ["bootstrap-installation.md", "../README.md", "../skills/go-platform-bootstrap/references/product-setup.md"]
+related: ["platform-installation.md", "../README.md", "../skills/go-platform-bootstrap/SKILL.md"]
 ---
 
 # ADE: установка и управление навыками ИИ
@@ -11,7 +12,7 @@ related: ["bootstrap-installation.md", "../README.md", "../skills/go-platform-bo
 Как агентские среды (ADE) — Codex, Claude Code, Zed, Orca — находят навыки
 платформы и как устроен их жизненный цикл. Порядок установки платформы и
 настройки продукта описан в
-[bootstrap-installation.md](bootstrap-installation.md); этот документ — про
+[platform-installation.md](platform-installation.md); этот документ — про
 расположение наборов и границы операций.
 
 ## Каталоги навыков
@@ -21,10 +22,10 @@ related: ["bootstrap-installation.md", "../README.md", "../skills/go-platform-bo
 | `~/.agents/skills/` | Глобальные навыки для Codex, Zed и совместимых сред |
 | `~/.claude/skills/` | Те же глобальные навыки для Claude Code |
 | `<продукт>/.agents/skills/`, `.claude/skills/` | Проектный набор под Git; имеет приоритет над глобальными |
-| `<продукт>/docs/agent-skills.md` | Реестр набора продукта: состав, источники, ревизии |
+| `<продукт>/engineering.yaml` | Инженерный профиль: состав, источники, ревизии |
 
 Глобальная установка — одна на машину: копирование навыков из доверенного клона
-в оба каталога (порядок — [bootstrap-installation.md](bootstrap-installation.md)).
+в оба каталога (порядок — [platform-installation.md](platform-installation.md)).
 Обнаружение глобальных Agent Skills зависит от ADE: поддержку нужно проверить
 в выбранной среде; возможно, потребуется перечитать список навыков или
 перезапустить агента.
@@ -35,7 +36,7 @@ related: ["bootstrap-installation.md", "../README.md", "../skills/go-platform-bo
 flowchart LR
     A["Доверенный клон платформы"] --> B["Глобальная установка в ~/.agents и ~/.claude"]
     B --> C["Опросник в целевом продукте"]
-    C --> D["Проектный набор в .agents/ и .claude/ + реестр"]
+    C --> D["Проектный набор в .agents/ и .claude/ + engineering.yaml"]
     D --> E["Работа, обновления по согласию"]
 ```
 
@@ -48,7 +49,7 @@ flowchart LR
 
 - Изменения глобальных каталогов — только после явного согласия; просьба
   «проверить» не разрешает установку или обновление.
-- Состав набора продукта фиксирует реестр `docs/agent-skills.md`;
+- Состав набора продукта фиксирует engineering.yaml в корне;
   проектные копии имеют приоритет и не меняются от глобальных обновлений.
 - Скрипты сторонних навыков не запускаются автоматически.
 - Работа в worktree не требует установки: `.agents/` и `.claude/` приходят из
@@ -56,11 +57,11 @@ flowchart LR
 
 ## Обновления
 
-Проверка обновлений — только чтение: сравнение ревизий реестра с источниками
+Проверка обновлений — только чтение: сравнение ревизий engineering.yaml с источниками
 (локальные клоны или `git ls-remote`). Применение — отдельная согласованная
 операция: глобальное обновление затрагивает все продукты машины. Прежние снимки
 сохраняются до успешной замены; при конфликте с существующим навыком установка
 останавливается без перезаписи. Orca и Graphify обновляются собственными
 официальными механизмами. Новые имена навыков добавляются правкой
-[каталога источников](../skills/go-platform-bootstrap/references/skill-sources.md),
+[каталога источников навыков](../skills/go-platform-bootstrap/references/skill-sources.md),
 а не непроверенным автоматическим поиском.
