@@ -11,6 +11,11 @@ platform:
 profile: "<go-api | web | desktop | mobile-native | ai | custom>"
 policy:
   file: "docs/agent-policy.md"
+# Необязательный блок; отсутствие в существующем проекте означает «не выбран».
+ui:
+  mode: "none" # canvas | prototype | none | both
+  prototype_path: null # prototype при выборе прототипирования
+  kit: null # выбранный UI kit; например shadcn/ui + Base UI
 skills:
   - name: "go-platform-bootstrap"
     source: "<репозиторий платформы>"

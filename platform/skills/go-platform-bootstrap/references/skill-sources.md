@@ -173,3 +173,41 @@ Android SDK/Gradle и другими фактически выбранными �
   решение пользователя.
 - Обновления глобальных копий затрагивают все продукты на машине — отдельное
   согласование; проектные копии обновляются независимо.
+
+## Проектная установка навыков прототипирования
+
+Для режима `prototype` допустима установка прямо из проверенного клона на
+согласованном SHA в оба проектных каталога, без глобального промежуточного шага.
+Глобальные каталоги не сканируются без разрешения и не меняются. Это исключение
+из обычного маршрута «глобальный источник → проект»; правила согласования состава,
+сохранения ресурсов, фиксации ревизий и защиты существующих файлов сохраняются.
+
+## Скиллы для разработки прототипов
+
+Опциональный набор поверх профиля, выбранный вместо canvas или вместе с ним
+явным решением. Порядок установки и критерии —
+[prototyping-installation.md](../../../references/prototyping-installation.md).
+Источники ниже — кандидаты для выбора, не команда установить все репозитории.
+Имена и ресурсы проверять по `SKILL.md` конкретной ревизии перед копированием.
+
+| Роль | Источник | Выбор |
+|---|---|---|
+| UI Designer | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill | `ui-ux-pro-max`; дизайн-направление и система, включить в основу |
+| UI kit | https://github.com/shadcn-ui/ui | `shadcn`; для React/shadcn, не дублировать навык профиля |
+| UI Reviewer | https://github.com/jakubkrehel/skills | `better-interface` как основной обзор; профильные better-* по необходимости, с их зависимостями |
+| Web review | https://github.com/vercel-labs/agent-skills | `web-design-guidelines`; для web/webview |
+| Полировка | Локальный `impeccable` из таблицы выше | Включить в основу при наличии; отсутствие явно отразить в плане |
+| Apple | https://github.com/dickwu/apple-design-skill | Ревью по Apple HIG для Apple-интерфейсов; сверить имя в SKILL.md |
+| Android | https://github.com/charliesbot/android-design | Дизайн Compose/Material; для Android, сверить имя в SKILL.md |
+| Native mobile | https://github.com/ivan-magda/mobile-design-skills | `mobile-design-ios` и/или `mobile-design-android` по целевой ОС; не навязывать native-паттерны web |
+| Motion | https://github.com/emilkowalski/skills | `emil-design-eng`, `review-animations`; остальные по задачам, избегать дублирования reviewer |
+| Visual QA | https://github.com/vercel-labs/agent-browser | `agent-browser`; браузерный просмотр и проверка, CLI устанавливается отдельно; не заменяет Playwright/axe-core |
+| Desktop | https://github.com/MC-Archived/Desktop-Taste-Skills | Для desktop предложить набор из `skills/` после проверки имён и зависимостей; качество окон, композиции и взаимодействий |
+
+Для web/webview предложить основу, shadcn, web review, motion и visual QA;
+для desktop добавить Desktop Taste, для macOS — Apple review по необходимости.
+Для native mobile заменить web-специфичные навыки соответствующим набором iOS
+или Android. При пересечении рекомендаций приоритет имеют согласованный kit,
+`DESIGN.md` и правила целевой платформы. Desktop Taste заявляет поддержку Codex:
+копирование переносимых файлов в Claude не доказывает работоспособность plugin-
+команд; проверить ADE и явно указать неподдерживаемые возможности.
