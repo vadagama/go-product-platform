@@ -34,7 +34,7 @@ related: ["canvas-installation.md", "skills-installation.md", "model-harness-con
 3. Копировать переносимые сборки на фиксированном SHA непосредственно в
    `.agents/skills/` и `.claude/skills/` корня продукта с ресурсами и лицензиями.
    Глобальная установка не обязательна. OpenCode использует `.agents/skills/`;
-   его адаптеры — по [инструкции OpenCode](opencode-installation.md).
+   его адаптеры — по [инструкции OpenCode](ade-installation.md#opencode).
    Совпадения имён и пользовательские изменения проверять по diff, не перезаписывать.
 4. Для Impeccable брать сборку соответствующей ADE, включая `reference/`, scripts
    и остальные необходимые ресурсы. Копирование одного `SKILL.md` недостаточно.
@@ -170,7 +170,7 @@ README каждого прототипа фиксирует гипотезу, а
 
 Существующее `ui.mode: prototype` трактовать как прежний общий UI-набор; при
 перенастройке заменить на `skills`, сохранив навыки. `canvas`, `none` и `both`
-сохраняют смысл. Новый профиль — engineering schema 1.1; product.yaml не меняется.
+сохраняют смысл. Новый профиль — engineering schema 1.2; product.yaml не меняется.
 Осмотреть `ui.prototype_path`/`prototype/`: если там целевое приложение, записать
 его в `ui.target.path` и оставить на месте; если эксперимент — включить в items,
 сохранив путь до согласованного переноса в `prototypes/PROTOTYPE-NNNN-slug`. Не угадывать назначение

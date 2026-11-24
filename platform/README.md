@@ -21,7 +21,7 @@ related: ["../README.md"]
 | `skills/go-project-platform-manager/` | Проектный управляющий навык: порядок установки, выбора и обновления набора через агента |
 | `templates/` | Шаблоны init-документов и таблица соответствия артефактов навыкам; состав и границы — [templates/README.md](templates/README.md) |
 | `handbook/` | Руководство — канонический Markdown-источник |
-| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [graphify-installation.md](references/graphify-installation.md), [UI](references/prototyping-installation.md), [модели](references/model-harness-configuration.md), [OpenCode](references/opencode-installation.md) |
+| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [graphify-installation.md](references/graphify-installation.md), [UI](references/prototyping-installation.md), [модели](references/model-harness-configuration.md), [ADE](references/ade-installation.md) |
 | `constitution.md` | Инженерные инварианты проекта |
 
 Глобальные каталоги `~/.agents/skills/` и `~/.claude/skills/` служат источниками.
@@ -47,12 +47,18 @@ related: ["../README.md"]
 решения; код оценивается отдельно. Существующий `prototype/` мигрируется после
 проверки назначения приложения, без автоматического перемещения.
 
-## Модели и среды выполнения
+## Среды разработки и модели
 
-При настройке выбираются модели и харнесы для документации, кода, UI, ревью кода,
+При настройке пользователь выбирает одну или несколько ADE и основную среду:
+Codex, Claude Code, OpenCode, Orca, Zed. Опции и множественный выбор показываются
+нативными формами, когда они доступны; ограничения интерфейса учитывает агент.
+Настраиваются только выбранные интеграции, предпочтения можно изменить позже.
+
+Затем выбираются модели и исполнители для документации, кода, UI, ревью кода,
 ревью дизайна, требований и архитектуры. Назначения фиксируются в engineering.yaml;
 управляющий навык умеет [перенастроить существующий продукт](references/model-harness-configuration.md).
-Codex, Claude Code и [OpenCode](references/opencode-installation.md) используют
-общие правила и навыки; для каждой роли проверяются провайдер, точный model ID и
+[Единая инструкция ADE](references/ade-installation.md) описывает установку,
+адаптеры и проверку всех пяти сред. Для Orca и Zed отдельно выбирается запускаемый
+агент. Для каждой роли проверяются провайдер, точный model ID и
 способ запуска. Claude, DeepSeek и GLM доступны через совместимые назначения,
 подтверждённые в выбранной среде.

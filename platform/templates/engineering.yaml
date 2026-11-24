@@ -4,7 +4,7 @@
 # изменения согласуются в чате. Для не-Git источника фиксируйте версию или
 # дату снимка с контрольной суммой; ревизии описывают проектные копии и не
 # меняются от глобального обновления. Версии CLI Graphify и Orca — в MANUAL.md.
-schema_version: "1.1"
+schema_version: "1.2"
 platform:
   source: "go-product-platform"
   revision: "<git-sha ревизии платформы>"
@@ -27,11 +27,16 @@ ui:
     items: [] # {id, path, status, target_specs}; path от корня: prototypes/PROTOTYPE-0001-name
 ai:
   # Не конфигурация исполняемого диспетчера: агент создаёт адаптеры и проверяет их.
-  # Список активных сред, например ["codex", "claude-code", "opencode"].
+  # Выбранные ADE; настройка только выбранных интеграций, не всех приложений.
+  surfaces: [] # codex | claude-code | opencode | orca | zed
+  primary_surface: null # одно из surfaces; null = ещё не выбрано
+  # Фактические исполнители: codex | claude-code | opencode | zed (встроенный).
+  # Для Orca и внешних агентов Zed указать запускаемый харнес отдельно от ADE.
   harnesses: []
   assignments: []
   # Каждая запись assignments:
   # - id: "ui-worker"
+  #   surface: "opencode"
   #   harness: "opencode"
   #   provider: "<проверенный ID провайдера>"
   #   model: "<точный доступный ID модели>"

@@ -32,6 +32,9 @@ product/
   landscape.yaml                  # только при подключении корпоративного каталога
   .gitignore
   .agents/, .claude/              # проектные материалы набора, под Git
+  .codex/                        # конфигурация/роли, если выбран Codex
+  .zed/                          # проектные настройки, если нужны для Zed
+  orca.yaml                      # lifecycle-команды, если нужны для Orca
   .opencode/                     # нативные адаптеры, если выбран OpenCode
   opencode.json                  # либо opencode.jsonc, если выбран OpenCode
   prototypes/                    # экспериментальные прототипы
@@ -117,11 +120,11 @@ stage: "development"
 
 `engineering.yaml` — инженерный профиль и единственное место фиксации состава
 набора и назначений моделей (замена реестра `docs/agent-skills.md` и lock-файла платформы).
-Ниже минимальный фрагмент; полная схема 1.1 с ui и ai —
+Ниже минимальный фрагмент; полная схема 1.2 с ui и ai —
 [engineering.yaml](../templates/engineering.yaml):
 
 ```yaml
-schema_version: "1.1"
+schema_version: "1.2"
 platform:
   source: "go-product-platform"
   revision: "<git-sha ревизии платформы>"
@@ -159,7 +162,10 @@ JSON-совместимые значения; вложенность допус�
 Блоки ui.target, ui.prototypes, ai.roles и ai.assignments описаны в
 [UI-контракте](../references/prototyping-installation.md) и
 [контракте моделей](../references/model-harness-configuration.md).
-Schema 1.1 относится к engineering.yaml; product.yaml сохраняет 1.0.
+Schema 1.2 относится к engineering.yaml; product.yaml сохраняет 1.0.
+Schema 1.2 добавляет ai.surfaces/primary_surface и surface назначения;
+миграция 1.1 сохраняет роли и уточняет ADE, не угадывая её по харнесу.
+[Настройка всех ADE](../references/ade-installation.md) применяется только к выбранным средам.
 Отсутствующие блоки старого профиля означают «не настроено», миграция сохраняет
 неизвестные пользовательские поля.
 
