@@ -69,6 +69,14 @@ next: 19-agent-sdd.md
 | Кэш Go | [Ristretto v2](https://github.com/dgraph-io/ristretto) |
 | Реестр или генератор внедрения зависимостей | [Архивированный Wire](https://github.com/google/wire) |
 
+## UI и харнесы разработки
+
+- [Impeccable](https://github.com/pbakaus/impeccable) — дизайн, итерации и ревью UI.
+- [OpenCode Skills](https://opencode.ai/docs/skills/), [Instructions](https://opencode.ai/docs/instructions/),
+  [Config](https://opencode.ai/docs/config/), [Agents](https://opencode.ai/docs/agents/),
+  [Models](https://opencode.ai/docs/models/), [Providers](https://opencode.ai/docs/providers/) —
+  первичные источники адаптера; проверять против установленной версии CLI.
+
 ---
 
 Навигация: [← 17. Эталонный путь](17-roadmap.md) · [Оглавление](README.md) · [19. SDD →](19-agent-sdd.md)

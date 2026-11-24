@@ -12,8 +12,10 @@ related: ["platform-installation.md", "../README.md", "../templates/README.md"]
 Источник: [app-canvas](https://gitlab16.skiftrade.kz/design/app-canvas), официальный
 `canvas_setup.py`. Canvas предлагается при первоначальной настройке любого продукта
 с UI и может быть подключён позднее. Альтернатива —
-[скиллы для разработки прототипов](prototyping-installation.md) и приложение
-в `prototype/`; выбор режима фиксируется в `engineering.yaml`. Для backend-only проекта его можно пропустить.
+[общий набор UI-навыков](prototyping-installation.md) для целевого интерфейса
+и экспериментов. Целевая документация — docs/ui; прототипы создаются отдельно
+в prototypes/PROTOTYPE-NNNN-slug. Выбор фиксируется в engineering.yaml. Для backend-only
+проекта инструменты UI можно пропустить.
 
 1. Уточнить, создаётся ли интерфейс или подключается существующее приложение.
 2. Получить исходники в новую временную папку через Git с доступом к корпоративному

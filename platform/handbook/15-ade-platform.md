@@ -177,6 +177,20 @@ flowchart LR
 
 Источники: [Orca skills/updater](https://orca.dev/docs/cli/skills) · [Vercel Навыки агентов CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) · [Graphify](https://github.com/Graphify-Labs/graphify) · [Addy Osmani Навыки агентов](https://github.com/addyosmani/agent-skills).
 
+## OpenCode и перенастройка исполнителей
+
+[OpenCode](../references/opencode-installation.md) поддерживается через AGENTS.md
+и общий `.agents/skills/`; нативные адаптеры хранятся в `.opencode/`.
+Проектный конфиг и точные model IDs проверяются для установленной версии CLI.
+Третья копия общего набора не нужна; конфликты навыков из других источников
+проверяются при настройке.
+
+Назначения семи ролей и их замена в существующем продукте —
+[отдельный контракт](../references/model-harness-configuration.md).
+Управляющий навык меняет затронутые назначения, сохраняет остальные настройки,
+проверяет запуск и фиксирует результат в MANUAL; глобальное обновление навыков
+для смены моделей не требуется.
+
 ---
 
 Навигация: [← 14. Навыки ИИ](14-skills-catalog.md) · [Оглавление](README.md) · [16. Совместимость и ADR →](16-evolution-adrs.md)

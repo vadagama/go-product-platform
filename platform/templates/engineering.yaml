@@ -4,18 +4,51 @@
 # изменения согласуются в чате. Для не-Git источника фиксируйте версию или
 # дату снимка с контрольной суммой; ревизии описывают проектные копии и не
 # меняются от глобального обновления. Версии CLI Graphify и Orca — в MANUAL.md.
-schema_version: "1.0"
+schema_version: "1.1"
 platform:
   source: "go-product-platform"
   revision: "<git-sha ревизии платформы>"
 profile: "<go-api | web | desktop | mobile-native | ai | custom>"
 policy:
   file: "docs/agent-policy.md"
-# Необязательный блок; отсутствие в существующем проекте означает «не выбран».
+# В старом профиле отсутствие блоков означает «не настроено», а не готовность.
 ui:
-  mode: "none" # canvas | prototype | none | both
-  prototype_path: null # prototype при выборе прототипирования
-  kit: null # выбранный UI kit; например shadcn/ui + Base UI
+  mode: "none" # skills | canvas | none | both; legacy prototype -> skills
+  docs_path: "docs/ui"
+  kit: null
+  target:
+    path: null # фактическое приложение: web/, frontend/ и т.п.
+    stack: null
+  prototypes:
+    enabled: false # независимо от ui.mode
+    root: "prototypes"
+    naming: "PROTOTYPE-{number:04d}-{slug}"
+    stack: null # единый согласованный стек экспериментов
+    items: [] # {id, path, status, target_specs}; path от корня: prototypes/PROTOTYPE-0001-name
+ai:
+  # Не конфигурация исполняемого диспетчера: агент создаёт адаптеры и проверяет их.
+  # Список активных сред, например ["codex", "claude-code", "opencode"].
+  harnesses: []
+  assignments: []
+  # Каждая запись assignments:
+  # - id: "ui-worker"
+  #   harness: "opencode"
+  #   provider: "<проверенный ID провайдера>"
+  #   model: "<точный доступный ID модели>"
+  #   variant: null
+  #   status: "configured" # configured | verified | blocked
+  #   config_paths: [".opencode/agents/ui-development.md"]
+  #   launch: "<проверенная команда или способ выбора в ADE>"
+  #   verification: null # ссылка на результат в MANUAL; без секретов
+  roles:
+    documentation: null # id из assignments; null = ещё не выбрано
+    code: null
+    ui: null
+    code_review: null
+    design_review: null
+    requirements: null
+    architecture: null
+  fallback: "ask" # без молчаливой смены модели/харнеса
 skills:
   - name: "go-platform-bootstrap"
     source: "<репозиторий платформы>"

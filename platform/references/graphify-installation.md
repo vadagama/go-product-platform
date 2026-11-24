@@ -25,7 +25,7 @@ related: ["platform-installation.md", "canvas-installation.md", "../templates/ma
 [документация](https://docs.graphify.com/), проектный навык graphify.
 
 Из корня продукта определить фактические исходники, тесты, контракты и нужные
-документы: README, MANUAL, docs/ с SPEC/HLD/LLD/ADR, при необходимости design/.
+документы: README, MANUAL, docs/ с SPEC/HLD/ADR/UI, при необходимости design/.
 Не требовать ещё не созданные архитектурные документы при init.
 Зафиксировать включённые пути в MANUAL.md. Создать отслеживаемый
 `.graphifyignore`, дополняя существующий без потери пользовательских правил.
