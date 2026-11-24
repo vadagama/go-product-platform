@@ -60,9 +60,10 @@ High-риск и выпуск требуют фактического решен
 `python3 .canvas/board.py doctor`. Источник —
 https://gitlab16.skiftrade.kz/design/app-canvas.
 
-## Альтернатива canvas: прототипирование
+## Общий набор UI и экспериментальные прототипы
 
 Следовать [prototyping-installation.md](../../../references/prototyping-installation.md):
 проверенный источник → согласованный состав и SHA → оба проектных каталога →
-engineering.yaml → приложение в `prototype/`, если выбрано → проверки и MANUAL.
+engineering.yaml → целевой UI и `docs/ui/`; отдельно эксперименты
+`prototypes/PROTOTYPE-NNNN-slug`, если выбраны → проверки и MANUAL.
 Команды с `-g` не использовать для проектной установки.

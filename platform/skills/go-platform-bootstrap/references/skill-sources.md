@@ -55,6 +55,8 @@ flowchart LR
 | openbao | https://github.com/Getty/p5-www-openbao | Навык `openbao-general` (в репозитории — `.claude/skills/openbao-general/`) — общие вопросы работы с OpenBao (секреты). |
 | supabase | https://github.com/supabase/agent-skills | Официальные навыки Supabase: `supabase` (работа с любыми продуктами Supabase: Database, Auth, Edge Functions, Storage, CLI, отладка) и `supabase-postgres-best-practices` (практики Postgres: схема, миграции, RLS, индексы, производительность). |
 
+| impeccable | https://github.com/pbakaus/impeccable | Общий UI-навык: планирование UX, дизайн-система, создание интерфейсов, critique/audit, адаптация и полировка. Переносимые сборки по ADE, runtime и адаптеры проверять по README выбранной ревизии. |
+
 ## Локальные навыки
 
 Установлены глобально в `~/.agents/skills/` и `~/.claude/skills/` вне
@@ -63,7 +65,6 @@ flowchart LR
 
 | Навык | Назначение |
 |---|---|
-| impeccable | Дизайн и полировка фронтенд-интерфейсов: UX-ревью, иерархия, типографика, цвет, движение, UX-тексты, доступность; фиксация дизайн-системы (DESIGN.md, токены). |
 | telegram-bot-ui | Интерфейс Telegram-ботов: тексты и микрокопирайтинг, клавиатуры и кнопки, навигация и подтверждения, состояния, стриминг AI-ответов, форматирование сообщений. |
 | yandex-cloud-engineer | Инфраструктура Yandex Cloud как код: Terraform, landing zone, IAM, VPC, Managed Kubernetes, DNS, резервное копирование, GitLab CI/CD, HLD/ADR. |
 
@@ -174,29 +175,31 @@ Android SDK/Gradle и другими фактически выбранными �
 - Обновления глобальных копий затрагивают все продукты на машине — отдельное
   согласование; проектные копии обновляются независимо.
 
-## Проектная установка навыков прототипирования
+## Проектная установка навыков UI
 
-Для режима `prototype` допустима установка прямо из проверенного клона на
+Для общего UI-набора (`skills`/`both`) допустима установка прямо из проверенного клона на
 согласованном SHA в оба проектных каталога, без глобального промежуточного шага.
 Глобальные каталоги не сканируются без разрешения и не меняются. Это исключение
 из обычного маршрута «глобальный источник → проект»; правила согласования состава,
 сохранения ресурсов, фиксации ревизий и защиты существующих файлов сохраняются.
 
-## Скиллы для разработки прототипов
+<a name="скиллы-для-разработки-прототипов"></a>
 
-Опциональный набор поверх профиля, выбранный вместо canvas или вместе с ним
-явным решением. Порядок установки и критерии —
+## Скиллы для целевого UI и прототипов
+
+Общий набор поверх профиля для целевого UI и экспериментов; режим `skills`
+или `both` с Canvas. Создание прототипов выбирается отдельно. Порядок установки и критерии —
 [prototyping-installation.md](../../../references/prototyping-installation.md).
 Источники ниже — кандидаты для выбора, не команда установить все репозитории.
 Имена и ресурсы проверять по `SKILL.md` конкретной ревизии перед копированием.
 
 | Роль | Источник | Выбор |
 |---|---|---|
-| UI Designer | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill | `ui-ux-pro-max`; дизайн-направление и система, включить в основу |
+| UI Designer | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill | `ui-ux-pro-max`; дополнительное исследование/дизайн по необходимости, с разделением ролей с Impeccable |
 | UI kit | https://github.com/shadcn-ui/ui | `shadcn`; для React/shadcn, не дублировать навык профиля |
-| UI Reviewer | https://github.com/jakubkrehel/skills | `better-interface` как основной обзор; профильные better-* по необходимости, с их зависимостями |
+| UI Reviewer | https://github.com/jakubkrehel/skills | `better-interface` как дополнительный обзор при необходимости; основной дизайн-review — отдельный проход Impeccable; профильные better-* по необходимости, с их зависимостями |
 | Web review | https://github.com/vercel-labs/agent-skills | `web-design-guidelines`; для web/webview |
-| Полировка | Локальный `impeccable` из таблицы выше | Включить в основу при наличии; отсутствие явно отразить в плане |
+| Дизайн и итерации | https://github.com/pbakaus/impeccable | `impeccable`; основа для целевого UI и прототипов, включая планирование, дизайн-систему, critique/audit и полировку |
 | Apple | https://github.com/dickwu/apple-design-skill | Ревью по Apple HIG для Apple-интерфейсов; сверить имя в SKILL.md |
 | Android | https://github.com/charliesbot/android-design | Дизайн Compose/Material; для Android, сверить имя в SKILL.md |
 | Native mobile | https://github.com/ivan-magda/mobile-design-skills | `mobile-design-ios` и/или `mobile-design-android` по целевой ОС; не навязывать native-паттерны web |
@@ -208,6 +211,6 @@ Android SDK/Gradle и другими фактически выбранными �
 для desktop добавить Desktop Taste, для macOS — Apple review по необходимости.
 Для native mobile заменить web-специфичные навыки соответствующим набором iOS
 или Android. При пересечении рекомендаций приоритет имеют согласованный kit,
-`DESIGN.md` и правила целевой платформы. Desktop Taste заявляет поддержку Codex:
+`docs/ui/DESIGN.md` для целевого UI (либо DESIGN.md эксперимента) и правила целевой платформы. Desktop Taste заявляет поддержку Codex:
 копирование переносимых файлов в Claude не доказывает работоспособность plugin-
 команд; проверить ADE и явно указать неподдерживаемые возможности.

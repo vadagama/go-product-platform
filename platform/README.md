@@ -21,7 +21,7 @@ related: ["../README.md"]
 | `skills/go-project-platform-manager/` | Проектный управляющий навык: порядок установки, выбора и обновления набора через агента |
 | `templates/` | Шаблоны init-документов и таблица соответствия артефактов навыкам; состав и границы — [templates/README.md](templates/README.md) |
 | `handbook/` | Руководство — канонический Markdown-источник |
-| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [graphify-installation.md](references/graphify-installation.md) |
+| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [graphify-installation.md](references/graphify-installation.md), [UI](references/prototyping-installation.md), [модели](references/model-harness-configuration.md), [ADE](references/ade-installation.md) |
 | `constitution.md` | Инженерные инварианты проекта |
 
 Глобальные каталоги `~/.agents/skills/` и `~/.claude/skills/` служат источниками.
@@ -35,9 +35,30 @@ related: ["../README.md"]
 обновление или сканирование глобальных навыков. Пользователь одобряет глобальные
 изменения отдельно.
 
-## Скиллы для разработки прототипов
+## Целевой UI и эксперименты
 
-При настройке UI можно выбрать canvas или [проектный набор для прототипирования](references/prototyping-installation.md).
-Прототип в `prototype/` использует UI kit, дизайн-систему и mock API на целевом
-стеке продукта. Доступны дополнения для desktop, iOS и Android; Storybook служит
-каталогом компонентов, пользовательские сценарии демонстрируются в приложении.
+[Общий UI-набор](references/prototyping-installation.md) с Impeccable
+используется для целевого приложения и прототипов. Режимы: `skills`, `canvas`,
+`none`, `both`; эксперименты включаются отдельно. Документация целевого UI —
+`docs/ui/DESIGN.md` и `docs/ui/SPEC-NNNN-name/{vision,components,screens}.md`.
+
+Прототипы проверяют идеи на едином согласованном стеке в отдельных каталогах
+`prototypes/PROTOTYPE-0001-name`, `prototypes/PROTOTYPE-0002-name`. В продукт переносятся проверенные
+решения; код оценивается отдельно. Существующий `prototype/` мигрируется после
+проверки назначения приложения, без автоматического перемещения.
+
+## Среды разработки и модели
+
+При настройке пользователь выбирает одну или несколько ADE и основную среду:
+Codex, Claude Code, OpenCode, Orca, Zed. Опции и множественный выбор показываются
+нативными формами, когда они доступны; ограничения интерфейса учитывает агент.
+Настраиваются только выбранные интеграции, предпочтения можно изменить позже.
+
+Затем выбираются модели и исполнители для документации, кода, UI, ревью кода,
+ревью дизайна, требований и архитектуры. Назначения фиксируются в engineering.yaml;
+управляющий навык умеет [перенастроить существующий продукт](references/model-harness-configuration.md).
+[Единая инструкция ADE](references/ade-installation.md) описывает установку,
+адаптеры и проверку всех пяти сред. Для Orca и Zed отдельно выбирается запускаемый
+агент. Для каждой роли проверяются провайдер, точный model ID и
+способ запуска. Claude, DeepSeek и GLM доступны через совместимые назначения,
+подтверждённые в выбранной среде.

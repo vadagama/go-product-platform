@@ -177,6 +177,20 @@ flowchart LR
 
 Источники: [Orca skills/updater](https://orca.dev/docs/cli/skills) · [Vercel Навыки агентов CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) · [Graphify](https://github.com/Graphify-Labs/graphify) · [Addy Osmani Навыки агентов](https://github.com/addyosmani/agent-skills).
 
+## Выбор ADE и перенастройка исполнителей
+
+[Единая инструкция ADE](../references/ade-installation.md) содержит настройку
+Codex, Claude Code, OpenCode, Orca и Zed. Пользователь выбирает набор сред и основную;
+для Orca/Zed отдельно определяется исполнитель. Настраиваются только выбранные
+интеграции. Опрос использует нативные формы и варианты, при отсутствии multi-select —
+шаги выбора; ограничения и текстовый fallback описаны в том же документе.
+
+Общий снимок платформы переносим между средами. Семь ролей и реальные назначения
+фиксирует engineering.yaml schema 1.2; выбор ADE — surfaces/primary_surface,
+исполнители — harnesses/assignments. Изменение предпочтений не требует повторного
+bootstrap и не удаляет пользовательские настройки. Контракт и миграция —
+[модели и харнесы](../references/model-harness-configuration.md).
+
 ---
 
 Навигация: [← 14. Навыки ИИ](14-skills-catalog.md) · [Оглавление](README.md) · [16. Совместимость и ADR →](16-evolution-adrs.md)
