@@ -54,6 +54,9 @@ ai:
     requirements: null
     architecture: null
   fallback: "ask" # без молчаливой смены модели/харнеса
+# Необязательный процесс рефакторинга/миграции; null = не заведён.
+# Формат — skills/go-product-modernization/references/profile.md материалов платформы.
+modernization: null
 skills:
   - name: "go-platform-bootstrap"
     source: "<репозиторий платформы>"

@@ -399,6 +399,21 @@ required check. Проверка формата не означает приём
 независимость ревью. Рецензент указывает конкретные файлы и выводы; LLM не является
 доказательством безошибочности.
 
+## Модернизация продукта
+
+Необязательный блок `modernization` engineering schema 1.2 фиксирует baseline,
+исходный/целевой стек, scope и ссылки на этапы. Формат и возобновление —
+[контракт профиля](../skills/go-product-modernization/references/profile.md).
+Его отсутствие/null не включает процесс; product schema не меняется.
+
+Навык [go-product-modernization](../skills/go-product-modernization/SKILL.md)
+использует существующие каталоги: assessment в hld, решения в adrs, программа
+в initiatives, этапы в specs, переключение в operations. Артефакты создаются
+по выбранному объёму, аудит не порождает пустой комплект SPEC. Подробности —
+[обследование и артефакты](../skills/go-product-modernization/references/assessment.md).
+После завершения обновляются фактический профиль, HLD и MANUAL; история перехода
+сохраняется, следующие функции выполняются обычным SDD.
+
 ## Миграция структуры
 
 Продукты v18 переносят при обновлении: `docs/workflow.md` → `docs/agent-policy.md`
