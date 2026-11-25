@@ -18,6 +18,7 @@ related: ["../README.md"]
 | Путь | Описание |
 |---|---|
 | `skills/go-platform-bootstrap/` | Навык начальной настройки: SKILL.md (профили, установка, инициализация, критерии готовности) + references (опросник, источники навыков, операции агента, примеры AGENTS.md/CLAUDE.md) |
+| `skills/go-product-modernization/` | Аудит готового Git-продукта, рефакторинг/миграция стека, этапы и завершение перехода; [навык](skills/go-product-modernization/SKILL.md) |
 | `skills/go-project-platform-manager/` | Проектный управляющий навык: порядок установки, выбора и обновления набора через агента |
 | `templates/` | Шаблоны init-документов и таблица соответствия артефактов навыкам; состав и границы — [templates/README.md](templates/README.md) |
 | `handbook/` | Руководство — канонический Markdown-источник |

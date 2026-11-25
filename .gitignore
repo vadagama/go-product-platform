@@ -1,2 +1,5 @@
 .DS_Store
 body.html
+
+# Graphify: local generated graph and extraction cache
+/graphify-out/
