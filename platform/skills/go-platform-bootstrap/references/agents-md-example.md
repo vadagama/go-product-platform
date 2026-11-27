@@ -163,6 +163,10 @@ OpenCode читает этот файл и `.agents/skills/`; его натив�
 - `pnpm typecheck` и `pnpm build` в `web/` — типы и production-сборка UI.
 - `pnpm test:e2e` в `web/` — Playwright smoke; детали в `web/e2e/README.md`.
 
+## Анализ Go-кода
+
+Из каталога Go-модуля обнови индекс командой `gokg analyze --tests`. При изменении интерфейса проверь его реализации, после правки выполни `gokg impact --depth 2`. Сверь результат с исходниками, тестами и контрактами через Graphify.
+
 ## Graphify — навигация по кодовой базе
 
 - Навык: `.agents/skills/graphify/SKILL.md`. Для архитектуры, связей символов

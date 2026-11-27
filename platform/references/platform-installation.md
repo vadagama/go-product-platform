@@ -82,6 +82,8 @@ flowchart LR
   `skills/<имя>` содержит общие референсы `references/`; они копируются в
   `.agents/references/` и `.claude/references/` продукта. Референсы и шаблоны
   процесса входят во все профили, включая `custom`.
+- Для загружаемого Go-модуля подключить [GoKG](gokg-installation.md) и проверить индекс из каталога модуля.
+
 - Полный цикл Graphify — [обязательная интеграция](graphify-installation.md):
   область анализа, первоначальный граф, хуки, инструкции агента и проверка обновления.
 - **Graphify** — утилита (`uv tool install graphifyy`) плюс навык по инструкции
@@ -119,9 +121,9 @@ flowchart LR
 | `README.md`, `CHANGELOG.md`, весь `platform/` | `ROOT/references/go-product-platform/`, с сохранением дерева клона |
 | `platform/skills/go-platform-bootstrap/` | `ROOT/skills/go-platform-bootstrap/` |
 | `platform/skills/go-project-platform-manager/` | `ROOT/skills/go-project-platform-manager/` |
+| `platform/skills/go-product-reverse/` | `ROOT/skills/go-product-reverse/` |
 | `platform/skills/go-product-modernization/` | `ROOT/skills/go-product-modernization/` |
 
-| `platform/skills/go-product-reverse/` | `ROOT/skills/go-product-reverse/` |
 Снимок содержит handbook, constitution, шаблоны, инструкции и исходные навыки.
 Не копируйте `.git/`, временные файлы и секреты. Не используйте абсолютные пути
 к исходному клону или симлинки: проектный набор должен работать после checkout

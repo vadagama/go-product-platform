@@ -202,6 +202,8 @@ flowchart TD
    согласованный раздел AGENTS.md, проверка обновления и восстановление в MANUAL.md.
    Шаг обязателен для всех профилей и существующих продуктов.
 
+10. Если доступен Go-модуль, подключить [GoKG](../../references/gokg-installation.md), проверить статистику и запрос. Для пустого проекта записать в MANUAL.md шаг подключения при появлении модуля.
+
 ### Критерии готовности
 
 Проверки выполняет агент после завершения настройки и по каждому запросу
@@ -251,9 +253,9 @@ flowchart TD
 |---|---|
 | go-platform-bootstrap | настройка платформы, worktrees, обновление навыков (этот навык) |
 | [go-project-platform-manager](../go-project-platform-manager/SKILL.md) | проверка, выбор и обновление проектного набора |
+| [go-product-reverse](../go-product-reverse/SKILL.md) | восстановление архитектуры, контрактов и руководств по исходникам |
 | [go-product-modernization](../go-product-modernization/SKILL.md) | аудит существующего продукта, рефакторинг и поэтапная миграция стека |
 | [graphify](https://github.com/Graphify-Labs/graphify) | граф исходников и архитектурная навигация |
-| [go-product-reverse](../go-product-reverse/SKILL.md) | восстановление архитектуры, контрактов и руководств по исходникам |
 
 Референсы и шаблоны процесса разработки — во все профили, включая `custom`;
 они ставятся в `.agents/references/` и `.claude/references/`, источник и
