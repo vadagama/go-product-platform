@@ -56,7 +56,7 @@ flowchart TD
 | `my-product/engineering.yaml` | Инженерный профиль: набор, источники, ревизии | Отслеживается Git; источник истины по составу |
 | `my-product/AGENTS.md`, `CLAUDE.md` | Русские правила workflow и приоритета проектных навыков | Отслеживается Git |
 | `.gokg/` в каталоге Go-модуля | Локальный индекс типов и вызовов GoKG | Игнорируется Git, строится в каждом worktree |
-| `my-product/graphify-out/` | Локальный граф кода | Игнорируется Git; каждое дерево строит само |
+| Локальный индекс codebase-memory-mcp | Граф кода и документов | Хранится в кеше инструмента отдельно для каждого дерева |
 
 Наличие навыка в глобальном каталоге не означает его обязательное применение:
 каждый продукт использует только зафиксированный в engineering.yaml набор, и инструкции
@@ -97,13 +97,13 @@ worktree получает набор автоматически — без ус�
 ```mermaid
 flowchart LR
     A["git worktree add"] --> B["Готовые .agents/ и .claude/ из Git"]
-    B --> C["Построить граф graphify-out/ локально"]
+    B --> C["Построить индекс рабочего дерева локально"]
     C --> D["Работа над фичей"]
     D --> E["Очистка: БД, порты, логи этого дерева"]
 ```
 
-Граф Graphify — генерируемый материал: каждое дерево строит его по инструкции
-проектного навыка Graphify. Локальный `.canvas/`, если используется, также
+Граф codebase-memory-mcp — генерируемый материал: каждое дерево строит его по инструкции
+подключения MCP-сервера. Локальный `.canvas/`, если используется, также
 восстанавливается отдельно по [инструкции canvas](../references/canvas-installation.md);
 граф и runtime не входят в отслеживаемый набор навыков.
 
@@ -131,8 +131,8 @@ flowchart LR
 - источник и прежнюю/предлагаемую ревизию;
 - меняются ли команды установки или запуска скриптов;
 - план проверки после обновления и способ восстановления прежнего снимка;
-- что Graphify и Orca обслуживаются собственными механизмами
-  (`uv tool upgrade graphifyy`, встроенный updater Orca) независимо от Git-ревизий.
+- что codebase-memory-mcp и Orca обслуживаются собственными механизмами
+  (установка новой версии бинарного файла, встроенный updater Orca) независимо от Git-ревизий.
 
 Проектные копии не меняются от глобального обновления: их обновляют отдельно,
 показав список для согласования и обновив engineering.yaml. Новые имена навыков добавляются
@@ -176,7 +176,7 @@ flowchart LR
 терминальными командами. Агент обязан объяснять последствия, получать подтверждение
 и проводить фактические операции с проверяемыми результатами.
 
-Источники: [Orca skills/updater](https://orca.dev/docs/cli/skills) · [Vercel Навыки агентов CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) · [Graphify](https://github.com/Graphify-Labs/graphify) · [Addy Osmani Навыки агентов](https://github.com/addyosmani/agent-skills).
+Источники: [Orca skills/updater](https://orca.dev/docs/cli/skills) · [Vercel Навыки агентов CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) · [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) · [Addy Osmani Навыки агентов](https://github.com/addyosmani/agent-skills).
 
 ## Выбор ADE и перенастройка исполнителей
 

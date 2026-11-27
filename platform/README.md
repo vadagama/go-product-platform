@@ -23,7 +23,7 @@ related: ["../README.md"]
 | `skills/go-project-platform-manager/` | Проектный управляющий навык: порядок установки, выбора и обновления набора через агента |
 | `templates/` | Шаблоны init-документов и таблица соответствия артефактов навыкам; состав и границы — [templates/README.md](templates/README.md) |
 | `handbook/` | Руководство — канонический Markdown-источник |
-| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [graphify-installation.md](references/graphify-installation.md), [UI](references/prototyping-installation.md), [модели](references/model-harness-configuration.md), [ADE](references/ade-installation.md) |
+| `references/` | Инструкции установки: [platform-installation.md](references/platform-installation.md), [skills-installation.md](references/skills-installation.md), [canvas-installation.md](references/canvas-installation.md), [codebase-memory-installation.md](references/codebase-memory-installation.md), [UI](references/prototyping-installation.md), [модели](references/model-harness-configuration.md), [ADE](references/ade-installation.md) |
 | `constitution.md` | Инженерные инварианты проекта |
 
 Глобальные каталоги `~/.agents/skills/` и `~/.claude/skills/` служат источниками.

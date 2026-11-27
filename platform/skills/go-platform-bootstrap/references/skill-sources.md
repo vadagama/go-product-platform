@@ -1,6 +1,6 @@
 ---
 id: "REF-skill-sources"
-description: "Единственный каталог источников навыков: составы профилей и критерии компонентов, репозитории и состав навыков каждого источника, локальные навыки без публичного источника, отдельно устанавливаемые инструменты (Graphify, Orca, canvas) и правила установки с фиксацией ревизий в engineering.yaml. Читать при выборе профиля, подборе, установке и обновлении набора."
+description: "Единственный каталог источников навыков: составы профилей и критерии компонентов, репозитории и состав навыков каждого источника, локальные навыки без публичного источника, отдельно устанавливаемые инструменты (codebase-memory-mcp, Orca, canvas) и правила установки с фиксацией ревизий в engineering.yaml. Читать при выборе профиля, подборе, установке и обновлении набора."
 kind: "reference"
 status: "current"
 owner: "maintainer"
@@ -88,7 +88,7 @@ flowchart LR
 | ai | база + golang-testing, protobuf, ai-sdk, ai-elements, security-and-hardening |
 | custom | база + явно согласованные навыки; технологические исключения фиксируются в docs/agent-policy.md |
 
-База каждого профиля — graphify, go-platform-bootstrap, go-project-platform-manager,
+База каждого профиля — go-platform-bootstrap, go-project-platform-manager,
 go-product-modernization, go-product-reverse и набор навыков процесса [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills),
 устанавливаемый по инструкциям своего репозитория
 ([состав](../SKILL.md#полный-список-устанавливаемых-и-проверяемых-навыков)).
@@ -139,7 +139,7 @@ custom меняет технологический состав, но сохра
 | mobile-native | mobile | Go API и выбранные SwiftUI/Compose клиенты; SDK, сборка и smoke на симуляторе/эмуляторе выбранной платформы |
 | custom | Общая основа + нужные дополнительные компоненты | Адаптации и исключения записать в HLD и docs/agent-policy.md, добавить проверки в чек-лист |
 
-Проверки инструментов — минимум; дополните graphify, sqlc, goose, mise, Swift/Xcode,
+Проверки инструментов — минимум; дополните codebase-memory-mcp, sqlc, goose, mise, Swift/Xcode,
 Android SDK/Gradle и другими фактически выбранными инструментами. Для pg/мобильных
 проверок CLI version недостаточно: проверки компонентов должны обращаться к среде.
 Зависимость «нужны credentials» нельзя заменить фиктивной зелёной проверкой.
@@ -155,7 +155,7 @@ Android SDK/Gradle и другими фактически выбранными �
 
 | Навык/инструмент | Источник | Способ установки |
 |---|---|---|
-| graphify | https://github.com/Graphify-Labs/graphify | `uv tool install graphifyy`; навык — по инструкции репозитория в оба глобальных каталога; затем [полная интеграция](../../../references/graphify-installation.md) в продукте |
+| codebase-memory-mcp | https://github.com/DeusData/codebase-memory-mcp | Бинарный файл из официального релиза и проектная конфигурация MCP. [Установка](../../../references/codebase-memory-installation.md) |
 | Orca-навыки (orca-cli, orchestration, computer-use, orca-linear, orca-emulator, orca-emulator-android, orca-per-workspace-env) | https://github.com/stablyai/orca | Собственный механизм Orca; не копировать вручную |
 | app-canvas | https://gitlab16.skiftrade.kz/design/app-canvas | По [canvas-installation.md](../../../references/canvas-installation.md) из материалов платформы |
 
