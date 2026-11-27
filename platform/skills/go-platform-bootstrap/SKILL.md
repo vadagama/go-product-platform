@@ -155,13 +155,13 @@ flowchart TD
 ```mermaid
 flowchart TD
     S1["1. product.yaml и engineering.yaml: паспорт и профиль"] --> S2["2. docs/README.md, agent-policy (при исключениях)"]
-    S2 --> S3["3. .gitignore: graphify-out/, .go-product-platform/"]
+    S2 --> S3["3. .gitignore: .go-product-platform/"]
     S3 --> S4["4. AGENTS.md и CLAUDE.md: блок платформы + разделы продукта"]
     S4 --> S5["5. MANUAL.md из шаблона"]
     S5 --> S6["6. engineering.yaml: фактический состав набора"]
     S6 --> S7["7. orca.yaml (только при использовании Orca)"]
     S7 --> S8["8. Проектные копии навыков в .agents/ и .claude/"]
-    S8 --> S9["9. Graphify: область анализа, граф, хуки, правила и проверка обновления"]
+    S8 --> S9["9. codebase-memory-mcp: область анализа, индекс, правила и проверка обновления"]
 ```
 
 1. Декларации init: если `product.yaml` или `engineering.yaml` отсутствуют —
@@ -174,7 +174,7 @@ flowchart TD
    документы не перезаписывать. Для целевого UI создать содержательные
    `docs/ui/DESIGN.md` и пакет фичи по [UI-контракту](../../references/prototyping-installation.md);
    не создавать фиктивную SPEC при настройке только инструментов.
-3. `.gitignore`: добавить `/graphify-out/`, `/.go-product-platform/` и другие
+3. `.gitignore`: добавить `/.go-product-platform/` и другие
    генерируемые артефакты продукта; существующие строки не дублировать.
 4. `AGENTS.md` — единственный источник правил продукта: блок платформы и
    разделы — из [примера](references/agents-md-example.md); в существующем
@@ -196,10 +196,7 @@ flowchart TD
    Четыре навыка платформы и полный снимок материалов переносить по
    [правилам упаковки](../../references/platform-installation.md#переносимый-набор-платформы).
 
-9. Полностью подключить Graphify по
-   [инструкции](../../references/graphify-installation.md): отслеживаемая
-   `.graphifyignore`, первоначальный граф, Git-хуки с сохранением Canvas,
-   согласованный раздел AGENTS.md, проверка обновления и восстановление в MANUAL.md.
+9. Подключить MCP-сервер и проверить индекс по [инструкции](../../references/codebase-memory-installation.md). Записать команды восстановления и результаты в MANUAL.md.
    Шаг обязателен для всех профилей и существующих продуктов.
 
 10. Если доступен Go-модуль, подключить [GoKG](../../references/gokg-installation.md), проверить статистику и запрос. Для пустого проекта записать в MANUAL.md шаг подключения при появлении модуля.
@@ -220,7 +217,7 @@ flowchart TD
 | 4а | Набор addyosmani/agent-skills установлен и настроен целиком по инструкциям своего репозитория: 26 навыков, slash-команды, персоны и общие чек-листы присутствуют; workflow и upstream процесса читаются; снимок платформы полон, его ссылки работают без исходного клона | состав выше и правила упаковки |
 | 5 | `product.yaml`, `engineering.yaml`, `AGENTS.md`, `CLAUDE.md`, `MANUAL.md` на месте; agent-policy.md — при исключениях; AGENTS.md на русском, требует workflow и маршрутизирует каждый навык из engineering.yaml; CLAUDE.md — тонкая ссылка на AGENTS.md с блоком платформы | осмотр файлов |
 | 6 | Приложение запускается: smoke-запуск и healthcheck | вывод процесса |
-| 7 | Graphify настроен полностью: область анализа, код и документы в графе, query, реальные обновления, совместимость хуков Canvas, правила агента и восстановление | [приёмка Graphify](../../references/graphify-installation.md), фактические результаты в MANUAL.md |
+| 7 | codebase-memory-mcp настроен полностью: область анализа, код и документы в графе, query, повторная индексация, правила агента и восстановление | [приёмка codebase-memory-mcp](../../references/codebase-memory-installation.md), фактические результаты в MANUAL.md |
 | 8 | Все применимые ai.roles назначены; адаптеры и фактические модели проверены, ограничения записаны | [модели и харнесы](../../references/model-harness-configuration.md) |
 | 9 | UI-набор работает для целевого UI и экспериментов; docs/ui и пути приложений согласованы | [UI](../../references/prototyping-installation.md) |
 | 10 | Все выбранные ADE и их исполнители проверены: правила, skills, модель, запуск, интерактивный вопрос либо причина fallback; невыбранные интеграции не активированы | [ADE](../../references/ade-installation.md#приёмка-и-корректировка), MANUAL |
@@ -255,7 +252,6 @@ flowchart TD
 | [go-project-platform-manager](../go-project-platform-manager/SKILL.md) | проверка, выбор и обновление проектного набора |
 | [go-product-reverse](../go-product-reverse/SKILL.md) | восстановление архитектуры, контрактов и руководств по исходникам |
 | [go-product-modernization](../go-product-modernization/SKILL.md) | аудит существующего продукта, рефакторинг и поэтапная миграция стека |
-| [graphify](https://github.com/Graphify-Labs/graphify) | граф исходников и архитектурная навигация |
 
 Референсы и шаблоны процесса разработки — во все профили, включая `custom`;
 они ставятся в `.agents/references/` и `.claude/references/`, источник и
@@ -301,7 +297,7 @@ setup-гайдам репозитория для используемых в п�
 - `AGENTS.md` — полностью на русском и единственный источник правил: блок
   платформы плюс правила на каждый запрос, маршрутизация всех навыков
   из engineering.yaml, контекст продукта, конвенции, проверки и навигация
-  Graphify. `CLAUDE.md` — тонкая ссылка на AGENTS.md с отличиями Claude Code
+  codebase-memory-mcp. `CLAUDE.md` — тонкая ссылка на AGENTS.md с отличиями Claude Code
   и тем же блоком платформы; правила не дублируются. Структура и примеры —
   [agents-md-example.md](references/agents-md-example.md) и
   [claude-md-example.md](references/claude-md-example.md).
@@ -321,13 +317,13 @@ setup-гайдам репозитория для используемых в п�
 - Повторные запросы управления набором и моделями (проверка, выбор, обновление) —
   [go-project-platform-manager](../go-project-platform-manager/SKILL.md).
   Worktree получает `.agents/` и `.claude/` из Git; каждое дерево строит
-  генерируемые материалы (граф graphify) само.
+  генерируемые материалы (граф codebase-memory-mcp) само.
 
 ## Проверки и обновления
 
 Запрос «только проверить» — осмотр набора и окружения и отчёт; setup не
 запускайте. Обновления навыков — только по отдельному согласию: сравнение
 ревизий с engineering.yaml, влияние на другие продукты машины, прежние снимки
-до успешной замены, проектные копии обновляются отдельно; Orca и Graphify —
+до успешной замены, проектные копии обновляются отдельно; Orca и codebase-memory-mcp —
 их собственными механизмами. Подробный порядок —
 [go-project-platform-manager](../go-project-platform-manager/SKILL.md).
