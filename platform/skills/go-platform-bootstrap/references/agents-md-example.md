@@ -90,6 +90,7 @@ Codex (desktop, CLI и IDE-интеграции), Zed Agent, Claude Code, OpenCo
 | Миграции и вывод из эксплуатации | `deprecation-and-migration` |
 | Выпуск фичи | `shipping-and-launch` |
 | Навигация по кодовой базе | `graphify` |
+| Восстановление архитектурной и пользовательской документации по коду | `go-product-reverse` |
 | Модернизация готового продукта, рефакторинг или миграция стека | `go-product-modernization` |
 | Управление набором платформы: проверка, выбор, обновление | `go-platform-bootstrap`, `go-project-platform-manager` |
 

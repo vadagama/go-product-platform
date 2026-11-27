@@ -18,6 +18,8 @@ description: Управление настройкой Go Product Platform и а
 
 ## Модернизация готового продукта
 
+Для восстановления документации и графа существующего продукта использовать [go-product-reverse](../go-product-reverse/SKILL.md).
+
 Запросы аудита, рефакторинга или смены стека направлять в
 [go-product-modernization](../go-product-modernization/SKILL.md).
 Он читает существующий modernization-блок и продолжает выбранный этап.

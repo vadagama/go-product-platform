@@ -33,6 +33,8 @@ related: ["../README.md", "../handbook/20-artifact-contract.md"]
   и установка, запуск и остановка, проверки и чек-лист готовности; секреты
   не вносятся.
 
+Для восстановления документации существующего продукта используйте [go-product-reverse](../skills/go-product-reverse/SKILL.md). Навык дополняет карту документов и MANUAL сведениями из реализации.
+
 Необязательный блок modernization в engineering.yaml описывает рефакторинг или
 миграцию готового продукта. Схема и правила заполнения —
 [контракт модернизации](../skills/go-product-modernization/references/profile.md).
