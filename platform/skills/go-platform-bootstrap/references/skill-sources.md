@@ -89,7 +89,7 @@ flowchart LR
 | custom | база + явно согласованные навыки; технологические исключения фиксируются в docs/agent-policy.md |
 
 База каждого профиля — graphify, go-platform-bootstrap, go-project-platform-manager,
-go-product-modernization и набор навыков процесса [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills),
+go-product-modernization, go-product-reverse и набор навыков процесса [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills),
 устанавливаемый по инструкциям своего репозитория
 ([состав](../SKILL.md#полный-список-устанавливаемых-и-проверяемых-навыков)).
 Референсы и шаблоны процесса разработки входят во все профили, включая `custom`;

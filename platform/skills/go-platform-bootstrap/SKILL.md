@@ -44,6 +44,8 @@ description: Подготовить новый или существующий G
 
 ## Существующий продукт: рефакторинг или миграция
 
+Для восстановления документации и графа существующего продукта использовать [go-product-reverse](../go-product-reverse/SKILL.md).
+
 Для запроса модернизации существующего Git-продукта использовать
 [go-product-modernization](../go-product-modernization/SKILL.md): сначала baseline,
 границы и выбранный объём, затем настройка только необходимого окружения.
@@ -191,7 +193,7 @@ flowchart TD
    указать команды продукта по [инструкции ADE](../../references/ade-installation.md#orca).
 8. Проектные копии согласованного набора: навыки в `.agents/skills/` и `.claude/skills/`,
    агенты в `agents/`, референсы и ресурсы в `references/` обоих каталогов.
-   Три навыка платформы и полный снимок материалов переносить по
+   Четыре навыка платформы и полный снимок материалов переносить по
    [правилам упаковки](../../references/platform-installation.md#переносимый-набор-платформы).
 
 9. Полностью подключить Graphify по
@@ -251,6 +253,7 @@ flowchart TD
 | [go-project-platform-manager](../go-project-platform-manager/SKILL.md) | проверка, выбор и обновление проектного набора |
 | [go-product-modernization](../go-product-modernization/SKILL.md) | аудит существующего продукта, рефакторинг и поэтапная миграция стека |
 | [graphify](https://github.com/Graphify-Labs/graphify) | граф исходников и архитектурная навигация |
+| [go-product-reverse](../go-product-reverse/SKILL.md) | восстановление архитектуры, контрактов и руководств по исходникам |
 
 Референсы и шаблоны процесса разработки — во все профили, включая `custom`;
 они ставятся в `.agents/references/` и `.claude/references/`, источник и
